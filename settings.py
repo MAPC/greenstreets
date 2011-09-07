@@ -35,17 +35,9 @@ TIME_ZONE = 'America/Chicago'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-LANGUAGES = (
-    ('en', _('English')),
-    ('es', _('Spanish')),
-    ('pt', _('Portuguese')),
-    ('fr', _('French')),
-    ('ht', _('Haitian Creole')),
-    ('vi', _('Vietnamese')),
-    ('km', _('Khmer')),
-    ('zh', _('Chinese')),
-    ('ar', _('Arabic')),
-)
+# LANGUAGES = (
+#    ('en', _('English')),
+#)
 
 SITE_ID = 1
 
@@ -111,7 +103,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'localeurl.middleware.LocaleURLMiddleware',
+    # 'localeurl.middleware.LocaleURLMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -120,7 +112,7 @@ MIDDLEWARE_CLASSES = (
    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
-ROOT_URLCONF = 'walkboston.urls'
+ROOT_URLCONF = 'greenstreets.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -140,11 +132,8 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'debug_toolbar',
-    'walkboston.survey',
+    'survey',
     'south',
-    'rosetta',
-    'localeurl',
-    'dbgettext',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -186,12 +175,6 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.signals.SignalDebugPanel',
     'debug_toolbar.panels.logger.LoggingPanel',
 )
-
-# dbgettext settings
-DBGETTEXT_PROJECT_OPTIONS = 'walkboston.dbgettext_options'
-
-# format options
-FORMAT_MODULE_PATH = 'walkboston.formats'
 
 # import local settings
 try:

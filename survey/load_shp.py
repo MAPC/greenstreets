@@ -1,6 +1,6 @@
 import os
 from django.contrib.gis.utils import LayerMapping
-from models import School, District, Street
+from models import School, District, Street, Town, Employer
 
 district_mapping = {
     'districtid': 'districtid',
@@ -20,6 +20,7 @@ def load_districts(verbose=True):
                       transform=False, encoding='iso-8859-1')
 
     lm.save(strict=True, verbose=verbose)
+
 
 school_mapping = {
     'schid': 'schid',
@@ -45,28 +46,54 @@ def load_schools(verbose=True):
     lm = LayerMapping(School, schools_shp, school_mapping,
                       transform=False, encoding='iso-8859-1')
 
-    lm.save(strict=True, verbose=verbose)
-    
-    
-street_mapping = {
+    lm.save(strict=True, verbose=verbose)    
+
+
+town_mapping = {
+    'town_id': 'town_id',
     'name': 'name',
-    'districtid_tmp': 'districtid',
+    'slug': 'slug',
+    'geometry': 'MULTIPOLYGON',
+}
+
+towns_shp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'C:/gis/greenstreets/towns.shp'))
+    
+def load_towns(verbose=True):
+    lm = LayerMapping(Town, towns_shp, town_mapping,
+                      transform=False, encoding='iso-8859-1')
+
+    lm.save(strict=True, verbose=verbose)  
+
+
+employer_mapping = {
+    'name': 'COMPANY_NA',
+    'address': 'PRIMARY_AD',
+    'infousa_id': 'INFOUSA_ID',
+    'Muni_ID': 'Muni_ID',
+    'geometry': 'POINT',
+}
+
+employers_shp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'C:/gis/greenstreets/employers.shp'))
+
+def load_employers(verbose=True):
+    lm = LayerMapping(Employer, employers_shp, employer_mapping,
+                      transform=False, encoding='iso-8859-1')
+    
+    lm.save(strict=True, verbose=verbose)
+
+
+street_mapping = {
+    'name': 'ST_NAME',
+    'tmp_districtid': 'districtid',
+    'tmp_town': 'L_TOWN_ID',
     'geometry': 'MULTILINESTRING',
 }
 
-street_shp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'C:/gis/walkboston/streets.shp'))
+street_shp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'C:/gis/greenstreets/streets.shp'))
 
 def load_streets(verbose=True):
     lm = LayerMapping(Street, street_shp, street_mapping,
                       transform=False, encoding='iso-8859-1')
     
     lm.save(strict=True, verbose=verbose)
-    
-    
-def set_street_district():
-    streets = Street.objects.filter(districtid__exact=None)
-    for street in streets:
-        district = District.objects.get(districtid=street.districtid_tmp)
-        street.districtid = district
-        street.save()
         

@@ -14,6 +14,80 @@ except ImportError:
     pass
 
 
+class Town(models.Model):
+    town_id = models.IntegerField(primary_key=True)
+    slug = models.SlugField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
+    
+    survey_active = models.BooleanField()
+    
+    geometry = models.MultiPolygonField(srid=26986)
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+
+
+class Employer(models.Model):
+    name = models.CharField(max_length=30, blank=True, null=True)
+    address = models.CharField(max_length=30, blank=True, null=True)
+    infousa_id = models.CharField(max_length=9, blank=True, null=True)
+    town = models.ForeignKey('Town', blank=True, null=True)
+    
+    geometry = models.PointField(srid=26986) # default SRS 4326
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+
+
+EMPLOYEE_MODES = (
+            ('', '--'),
+            ('w', _('Walk')),
+            ('b', _('Bike')),
+            ('sb', _('School Bus')),
+            ('fv', _('Family Vehicle')),
+            ('cp', _('Carpool')),
+            ('t', _('Transit (city bus, subway, etc.)')),
+            ('o', _('Other (skateboard, scooter, inline skates, etc.)'))
+            )
+
+ 
+class Employeesurvey(models.Model):
+    """
+    Questions for employees about their commute.
+    """
+    employer = models.ForeignKey('Employer')
+    other_employer = models.CharField(max_length=50)
+    street = models.CharField(max_length=50, blank=True, null=True)
+    cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
+    
+    to_work_today = models.CharField(max_length=2, blank=True, null=True, choices=EMPLOYEE_MODES)
+    from_work_today = models.CharField(max_length=2, blank=True, null=True, choices=EMPLOYEE_MODES)  
+    to_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=EMPLOYEE_MODES)
+    from_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=EMPLOYEE_MODES) 
+    
+    weight = models.IntegerField(blank=True, null=True)
+    height = models.IntegerField(blank=True, null=True)
+    
+    # GeoDjango
+    location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return u'%s' % (self.id)   
+    
+    class Meta:
+        verbose_name = 'Employee Survey'
+        verbose_name_plural = 'Employee Surveys' 
+
+
 class District(models.Model):
     """ School Districts """
     districtid = models.IntegerField(primary_key=True)
@@ -68,27 +142,11 @@ class School(models.Model):
     @permalink
     def get_absolute_url(self):
         return ('survey_school_form', None, { 'school_slug': self.slug, 'district_slug': self.districtid.slug})
-
-        
-class Street(models.Model):
-    """
-    Streets to be returned as type-ahead in street-fields
-    to limit the variety of street names and make geocoding
-    more accurate.
-    """
-    name = models.CharField(max_length=240)
-    districtid = models.ForeignKey('District', blank=True, null=True)
-    
-    geometry = models.MultiLineStringField(srid=26986)
-    objects = models.GeoManager()
-    
-    def __unicode__(self):
-        return self.name
  
              
 class Survey(models.Model):
     """
-    Survey base questions.
+    School Survey
     """
     school = models.ForeignKey('School')
     street = models.CharField(max_length=50, blank=True, null=True)
@@ -96,12 +154,17 @@ class Survey(models.Model):
     nr_vehicles = models.IntegerField('Number of Vehicles', blank=True, null=True)
     nr_licenses = models.IntegerField('Number of License', blank=True, null=True)
     ip = models.IPAddressField('IP Address', blank=True, null=True)
+    
     # GeoDjango
     location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
     objects = models.GeoManager()
     
     def __unicode__(self):
         return u'%s' % (self.id)
+    
+    class Meta:
+        verbose_name = 'School Survey'
+        verbose_name_plural = 'School Surveys'
 
 
 CHILD_GRADES = (
@@ -154,3 +217,19 @@ class Child(models.Model):
         return u'%s' % (self.id)
     
 
+class Street(models.Model):
+    """
+    Streets to be returned as type-ahead in street-fields
+    to limit the variety of street names and make geocoding
+    more accurate.
+    """
+    name = models.CharField(max_length=240)
+    
+    town = models.ForeignKey('Town', blank=True, null=True)
+    districtid = models.ForeignKey('District', blank=True, null=True)
+    
+    geometry = models.MultiLineStringField(srid=26986)
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return self.name

@@ -1,13 +1,12 @@
 {% load i18n %}
-{% load localeurl_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>{% block title %}{% endblock %}WalkBoston To School Parent Survey</title>
-	<meta name="description" content="WalkBoston To School Parent Survey">
-	<meta name="keywords" content="Boston, Metro, Planning, Education, Survey, Pedestrian, Walking">
+    <title>{% block title %}{% endblock %}Walk/Ride Day Pledge and Check-In</title>
+	<meta name="description" content="Green Streets Walk Ride Day Survey">
+	<meta name="keywords" content="Boston, Metro, Planning, Education, Survey, Pedestrian, Walking, Green Streets, Walk/Ride Day">
 	<meta name="author" content="MAPC">
         
     <!-- geotags -->
@@ -31,7 +30,7 @@
 	<script type="text/javascript">
 
 	  var _gaq = _gaq || [];
-	  _gaq.push(['_setAccount', 'UA-5547782-11']);
+	  _gaq.push(['_setAccount', '']);
 	  _gaq.push(['_trackPageview']);
 	
 	  (function() {
@@ -48,19 +47,7 @@
 	<div class="topbar">
 		<div class="fill">
 			<div class="container">
-				<h3><a href="/">MySchoolCommute.org</a></h3>
-				<ul>
-            		<li><a href="/about/">{% trans "About" %}</a></li>
-          		</ul>
-				<ul class="nav secondary-nav">
-                {% for lang in LANGUAGES %}
-			        {% ifequal lang.0 LANGUAGE_CODE %}
-			            <li class="active"><a href="#">{% trans lang.1 %}</a></li>
-			        {% else %}
-			            <li><a href="{{ request.path|chlocale:lang.0 }}">{% trans lang.1 %}</a></li>
-			        {% endifequal %}
-				{% endfor %}
-      			</ul>
+				<h3><a href="/">Walk/Ride Day Pledge and Check-In</a></h3>
 			</div>
 		</div>
 	</div>
@@ -72,7 +59,7 @@
 	
 	<footer>
 		<p>
-			{% trans "Questions? Please contact" %} <a href="mailto:admin@myschoolcommute.org?subject=MySchoolCommute.org Website Question">admin@myschoolcommute.org</a><br />
+			{% trans "Questions? Please contact" %} <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
 			&copy; <a href="http://www.mapc.org" title="Metropolitan Area Planning Council">MAPC</a> 2011
 		</p>	
 	</footer>

@@ -1,4 +1,4 @@
-from walkboston.survey.models import School, Survey, Child, District
+from survey.models import School, Survey, Child, District, Employer, Street
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -23,7 +23,7 @@ class SchoolAdmin(admin.OSMGeoAdmin):
     def survey_count(self, obj):
         return obj.survey_set.count()
     
-class SurveyAdmin(admin.OSMGeoAdmin):
+class SchoolsurveyAdmin(admin.OSMGeoAdmin):
     list_display = ('pk','school')
     search_fields = ['school__name']
 
@@ -32,5 +32,7 @@ class ChildAdmin(admin.ModelAdmin):
 
 admin.site.register(District, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
-admin.site.register(Survey, SurveyAdmin)
+admin.site.register(Survey, SchoolsurveyAdmin)
 admin.site.register(Child, ChildAdmin)
+admin.site.register(Employer, admin.OSMGeoAdmin)
+admin.site.register(Street, admin.OSMGeoAdmin)
