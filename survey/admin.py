@@ -1,4 +1,4 @@
-from survey.models import School, Schoolsurvey, Child, Schooldistrict, Employer, Street, Adultsurvey, Walkrideday
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Adultsurvey, Walkrideday
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -27,7 +27,7 @@ class SchoolAdmin(admin.OSMGeoAdmin):
 class Adultsurveyadmin(admin.OSMGeoAdmin):
     exclude = ('employer',)
     
-class SchoolsurveyAdmin(admin.OSMGeoAdmin):
+class StudentsurveyAdmin(admin.OSMGeoAdmin):
     list_display = ('pk','school')
     search_fields = ['school__name']
 
@@ -36,7 +36,7 @@ class ChildAdmin(admin.ModelAdmin):
 
 admin.site.register(Schooldistrict, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
-admin.site.register(Schoolsurvey, SchoolsurveyAdmin)
+admin.site.register(Studentsurvey, StudentsurveyAdmin)
 admin.site.register(Child, ChildAdmin)
 admin.site.register(Employer, admin.OSMGeoAdmin)
 admin.site.register(Street, admin.OSMGeoAdmin)

@@ -161,6 +161,7 @@ $(document).ready(function() {
 				if (status == google.maps.DirectionsStatus.OK) {
 					// EPA standard: 0.41kg CO2 per mile driven (convert to lbs and meters)
 					$("#saved_co2").text(Math.round(result.routes[0].legs[0].distance.value * legs * 0.41 * 2.20462262 / 1609.344));
+					$("#id_distance").val(result.routes[0].legs[0].distance.value * legs);
 				}
 			});
 		} else {
@@ -172,6 +173,7 @@ $(document).ready(function() {
 		var weight = parseFloat($("#id_weight").val());
 		$("#id_weight").text(weight); // return float value of weight
 		var calories = 0;
+		var duration = 0;
 		var mode_to = $("#id_to_work_today option:selected").val();
 		var mode_from = $("#id_from_work_today option:selected").val();
 		
@@ -207,6 +209,7 @@ $(document).ready(function() {
 			default:
 				var mets_from = 0;
 		}
+		// id_duration
 		if (mets_to !== 0) {
 	  		var request_to = {
 				origin: markerHome.getPosition(),
@@ -216,9 +219,11 @@ $(document).ready(function() {
 			};
 			directionsService.route(request_to, function(result, status) {
 				if (status == google.maps.DirectionsStatus.OK) {
+					duration += result.routes[0].legs[0].duration.value;
 					//calories = (mets/2.2) * weight * hours duration
-					calories += result.routes[0].legs[0].duration.value / 3600 * weight * mets_to / 2.2;
+					calories += duration / 3600 * weight * mets_to / 2.2;
 					$("#burned_calories").text(Math.round(calories));
+					$("#id_duration").val(duration);
 				}
 			});
 		}
@@ -231,9 +236,11 @@ $(document).ready(function() {
 			};
 			directionsService.route(request_from, function(result, status) {
 				if (status == google.maps.DirectionsStatus.OK) {
+					duration += result.routes[0].legs[0].duration.value;
 					//calories = (mets/2.2) * weight * hours duration
-					calories += result.routes[0].legs[0].duration.value / 3600 * weight * mets_from / 2.2;
+					calories += duration / 3600 * weight * mets_from / 2.2;
 					$("#burned_calories").text(Math.round(calories));
+					$("#id_duration").val(duration);
 				}
 			});
 		}
@@ -347,6 +354,8 @@ $(document).ready(function() {
 		
 		{{ adultform.home_location }}
 		{{ adultform.work_location }}
+		{{ adultform.distance }}
+		{{ adultform.duration }}
 		
 		<h3>How did you travel to and from work? (<span class="required_field">required</span>)</h3>
 		<div class="clearfix">

@@ -6,8 +6,8 @@ from django.utils import simplejson
 
 from django.forms.models import inlineformset_factory
 
-from survey.models import School, Schoolsurvey, Child, Schooldistrict, Street, Town, Adultsurvey, Employer, Walkrideday
-from survey.forms import SurveyForm, ChildForm, AdultForm
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Street, Town, Adultsurvey, Employer, Walkrideday
+from survey.forms import StudentForm, ChildForm, AdultForm
 
 def index(request):
     
@@ -15,7 +15,7 @@ def index(request):
     
 def district(request, district_slug):
     
-    district = District.objects.get(slug__iexact=district_slug)
+    district = Schooldistrict.objects.get(slug__iexact=district_slug)
     
     return render_to_response('survey/district.html', {
             'district': district,
@@ -41,20 +41,21 @@ def get_employers(request, slug):
     
     return HttpResponse(simplejson.dumps(employer_list), mimetype='application/json')
 
-def get_schools(request, districtid):
+def get_schools(request, slug):
     """
     Returns all schools for given district as JSON
     """
     
     # check if district exists
-    district = get_object_or_404(District.objects, districtid=districtid)
+    district = get_object_or_404(Schooldistrict.objects, slug=slug)
     
-    schools = School.objects.filter(districtid=district)
+    schools = School.objects.transform(4326).filter(districtid=district)
     
     response = {}
     
     for school in schools:
-        response[school.id] = dict(name=school.name, url=school.get_absolute_url())
+        school_latlon = "%f %f" % (school.geometry.y, school.geometry.x)
+        response[school.id] = dict(name=school.name, latlon = school_latlon)
 
     return HttpResponse(simplejson.dumps(response), mimetype='application/json')   
     
@@ -79,14 +80,37 @@ def get_streets(request, slug, regional_unit):
     
     return HttpResponse(simplejson.dumps(street_list), mimetype='application/json')
 
-
 def student(request):
-    """ Returns the student form """
     
-    # get all districts with active school surveys
-    districts = District.objects.filter(school__survey_active=True).distinct()
+    # check if district exists
+    districts = Schooldistrict.objects.filter(school__survey_active=True).distinct()
+
+    survey = Studentsurvey()
+       
+    SurveyFormset = inlineformset_factory(Studentsurvey, Child, form=ChildForm, extra=1, can_delete=False)
     
-    return render_to_response('survey/studentform.html', locals(), context_instance=RequestContext(request))
+    if request.method == 'POST':
+        surveyform = StudentForm(request.POST, instance=survey)
+        surveyformset = SurveyFormset(request.POST, instance=survey)
+        survey.walkrideday = Walkrideday.objects.filter(active=True).order_by('-date')[0]
+        survey.ip = request.META['REMOTE_ADDR']
+
+        if surveyformset.is_valid() and surveyform.is_valid():
+            surveyform.save()
+            surveyformset.save()
+            
+            return render_to_response('survey/thanks.html', locals(), context_instance=RequestContext(request))
+            
+        else:
+            towns = Town.objects.filter(survey_active=True)
+            return render_to_response('survey/studentform.html', locals(), context_instance=RequestContext(request))
+    else:
+        towns = Town.objects.filter(survey_active=True)
+        
+        surveyform = StudentForm(instance=survey)
+        surveyformset = SurveyFormset(instance=survey)
+
+        return render_to_response('survey/studentform.html', locals(), context_instance=RequestContext(request))
 
 def adult(request):
     
@@ -107,53 +131,3 @@ def adult(request):
         towns = Town.objects.filter(survey_active=True)
         return render_to_response('survey/adultform.html', locals(), context_instance=RequestContext(request))
 
-def form(request, district_slug, school_slug, **kwargs):
-    
-    # check if district exists
-    district = get_object_or_404(District.objects, slug__iexact=district_slug)
-    
-    # get school in district
-    school = get_object_or_404(School.objects, districtid=district, slug__iexact=school_slug)
-    
-    # translate to lat/lon
-    school.geometry.transform(4326)
-       
-    survey = Survey()   
-       
-    SurveyFormset = inlineformset_factory(Survey, Child, form=ChildForm, extra=1, can_delete=False)
-    
-    if request.method == 'POST':
-        surveyform = SurveyForm(request.POST, instance=survey)
-        surveyformset = SurveyFormset(request.POST, instance=survey)
-        survey.school = school
-        survey.ip = request.META['REMOTE_ADDR']
-        
-        if surveyformset.is_valid() and surveyform.is_valid():
-            surveyform.save()
-            surveyformset.save()
-            
-            return render_to_response('survey/thanks.html', {
-                },
-                context_instance=RequestContext(request)
-            )
-            
-        else:
-            return render_to_response('survey/studentform.html', {
-                'formerror': True,
-                'school' : school, 
-                'surveyform' : surveyform,
-                'surveyformset' : surveyformset,
-                },
-                context_instance=RequestContext(request)
-            )
-    else:
-        surveyform = SurveyForm(instance=survey)
-        surveyformset = SurveyFormset(instance=survey)
-
-        return render_to_response('survey/studentform.html', {
-            'school' : school, 
-            'surveyform' : surveyform,
-            'surveyformset' : surveyformset,
-            },
-            context_instance=RequestContext(request)
-        )

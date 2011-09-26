@@ -200,12 +200,12 @@ class Adultsurvey(models.Model):
         verbose_name_plural = 'Adult Surveys' 
 
 
-class Schoolsurvey(models.Model):
+class Studentsurvey(models.Model):
     """ School Survey """
     
-    walkrideday = models.ForeignKey('Walkrideday')
+    walkrideday = models.ForeignKey('Walkrideday', blank=True, null=True)
     
-    school = models.ForeignKey('School')
+    school = models.ForeignKey('School', blank=True, null=True)
     
     home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
     home_street = models.CharField(max_length=50, blank=True, null=True)
@@ -214,7 +214,7 @@ class Schoolsurvey(models.Model):
     distance = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
     duration = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
     
-    sponsor = models.ManyToManyField('Sponsor', limit_choices_to = {'active': True})
+    sponsor = models.ManyToManyField('Sponsor', limit_choices_to = {'active': True}, blank=True, null=True)
     
     name = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
@@ -275,7 +275,7 @@ CHILD_DROPOFF = (
 class Child(models.Model):
     """ A child that's checked in at a School """
     
-    survey = models.ForeignKey('Schoolsurvey')
+    survey = models.ForeignKey('Studentsurvey')
     
     grade = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_GRADES)
     
