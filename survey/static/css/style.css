@@ -7,9 +7,14 @@ footer {
 label {
 	width: 240px;
 }
-div.input {
+div.input, div.uneditable-input, button.impact, .impact.help-block {
     margin-left: 260px;
 }
+
+.input textarea {
+	width: 400px;
+}
+
 div.index {
 	margin-left: 0;
 }
@@ -32,3 +37,10 @@ select {
 span.required_field {
 	color: #9D261D;
 }
+
+.center {
+	text-align: center;
+	margin-top: 20px;
+}
+
+

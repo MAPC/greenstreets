@@ -14,7 +14,18 @@ except ImportError:
     pass
 
 
+class Walkrideday(models.Model):
+    """ Selected dates when Walk/Ride days happened"""
+    date = models.DateField(auto_now=False, auto_now_add=False)
+    active = models.BooleanField(default=False)
+    note = models.TextField(blank=True, null=True)
+    
+    def __unicode__(self):
+        return str(self.date)
+
+
 class Town(models.Model):
+    """ Towns participating in Walk/Ride Days"""
     town_id = models.IntegerField(primary_key=True)
     slug = models.SlugField(max_length=50, unique=True)
     name = models.CharField(max_length=50)
@@ -30,65 +41,7 @@ class Town(models.Model):
     class Meta:
         ordering = ['name']
 
-
-class Employer(models.Model):
-    name = models.CharField(max_length=30, blank=True, null=True)
-    address = models.CharField(max_length=30, blank=True, null=True)
-    infousa_id = models.CharField(max_length=9, blank=True, null=True)
-    town = models.ForeignKey('Town', blank=True, null=True)
-    
-    geometry = models.PointField(srid=26986) # default SRS 4326
-    objects = models.GeoManager()
-    
-    def __unicode__(self):
-        return self.name
-    
-    class Meta:
-        ordering = ['name']
-
-
-EMPLOYEE_MODES = (
-            ('', '--'),
-            ('w', _('Walk')),
-            ('b', _('Bike')),
-            ('sb', _('School Bus')),
-            ('fv', _('Family Vehicle')),
-            ('cp', _('Carpool')),
-            ('t', _('Transit (city bus, subway, etc.)')),
-            ('o', _('Other (skateboard, scooter, inline skates, etc.)'))
-            )
-
- 
-class Employeesurvey(models.Model):
-    """
-    Questions for employees about their commute.
-    """
-    employer = models.ForeignKey('Employer')
-    other_employer = models.CharField(max_length=50)
-    street = models.CharField(max_length=50, blank=True, null=True)
-    cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
-    
-    to_work_today = models.CharField(max_length=2, blank=True, null=True, choices=EMPLOYEE_MODES)
-    from_work_today = models.CharField(max_length=2, blank=True, null=True, choices=EMPLOYEE_MODES)  
-    to_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=EMPLOYEE_MODES)
-    from_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=EMPLOYEE_MODES) 
-    
-    weight = models.IntegerField(blank=True, null=True)
-    height = models.IntegerField(blank=True, null=True)
-    
-    # GeoDjango
-    location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
-    objects = models.GeoManager()
-    
-    def __unicode__(self):
-        return u'%s' % (self.id)   
-    
-    class Meta:
-        verbose_name = 'Employee Survey'
-        verbose_name_plural = 'Employee Surveys' 
-
-
-class District(models.Model):
+class Schooldistrict(models.Model):
     """ School Districts """
     districtid = models.IntegerField(primary_key=True)
     distname = models.CharField(max_length=35)
@@ -106,7 +59,7 @@ class District(models.Model):
     
     class Meta:
         ordering = ['distname']
-
+    
 
 class School(models.Model):
     """ School """
@@ -124,7 +77,7 @@ class School(models.Model):
     fax = models.CharField(max_length=15, blank=True, null=True)
     grades = models.CharField(max_length=70, blank=True, null=True)
     schl_type = models.CharField(max_length=3, blank=True, null=True)     
-    districtid = models.ForeignKey('District', blank=True, null=True)
+    districtid = models.ForeignKey('Schooldistrict', blank=True, null=True)
     
     survey_incentive = models.TextField(blank=True, null=True)
     survey_active = models.BooleanField('Is Survey School')
@@ -142,21 +95,138 @@ class School(models.Model):
     @permalink
     def get_absolute_url(self):
         return ('survey_school_form', None, { 'school_slug': self.slug, 'district_slug': self.districtid.slug})
+  
+    
+class Employer(models.Model):
+    """ Employer list to choose from """
+    name = models.CharField(max_length=30, blank=True, null=True)
+    address = models.CharField(max_length=30, blank=True, null=True)
+    infousa_id = models.CharField(max_length=9, blank=True, null=True)
+    town = models.ForeignKey('Town', blank=True, null=True)
+    
+    geometry = models.PointField(srid=26986) # default SRS 4326
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+
+
+class Sponsor(models.Model):
+    """ Walk/Ride day sponsors, likely also an Employer """
+    name_alt = models.CharField('Alternative Name', max_length=30, blank=True, null=True)
+    employer = models.ForeignKey('Employer')
+    
+    active = models.BooleanField(default=True)
+    walkrideday = models.ManyToManyField('Walkrideday')
+    
+class Street(models.Model):
+    """
+    Streets to be returned as type-ahead in street-fields
+    to limit the variety of street names and make geocoding
+    more accurate.
+    """
+    name = models.CharField(max_length=240)
+    
+    town = models.ForeignKey('Town', blank=True, null=True)
+    schooldistrict = models.ForeignKey('Schooldistrict', blank=True, null=True)
+    
+    geometry = models.MultiLineStringField(srid=26986)
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return self.name
+
+
+ADULT_MODES = (
+            ('w', _('Walk')),
+            ('b', _('Bike')),
+            ('cp', _('Carpool')),
+            ('t', _('Transit (bus, subway, train, etc.)')),
+            ('o', _('Other (skateboard, scooter, inline skates, etc.)'))
+            )
+
  
-             
-class Survey(models.Model):
+class Adultsurvey(models.Model):
     """
-    School Survey
+    Questions for adults about their commute work
+    and Green Streets interest.
     """
-    school = models.ForeignKey('School')
-    street = models.CharField(max_length=50, blank=True, null=True)
-    cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
-    nr_vehicles = models.IntegerField('Number of Vehicles', blank=True, null=True)
-    nr_licenses = models.IntegerField('Number of License', blank=True, null=True)
+    
+    walkrideday = models.ForeignKey('Walkrideday', blank=True, null=True)
+    
+    home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
+    home_street = models.CharField(max_length=50, blank=True, null=True)
+    home_cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
+    
+    employer = models.ForeignKey('Employer', blank=True, null=True)
+    other_employer = models.CharField(max_length=50, blank=True, null=True)
+    work_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)')
+    work_street = models.CharField(max_length=50, blank=True, null=True)
+    work_cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
+    
+    distance = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
+    duration = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
+    
+    to_work_today = models.CharField(max_length=2, blank=True, null=True, choices=ADULT_MODES)
+    from_work_today = models.CharField(max_length=2, blank=True, null=True, choices=ADULT_MODES)  
+    to_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=ADULT_MODES)
+    from_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=ADULT_MODES) 
+    
+    weight = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
+    
+    sponsor = models.ManyToManyField('Sponsor', limit_choices_to = {'active': True}, blank=True, null=True)
+    
+    name = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    newsletter = models.BooleanField(default=False)
+    coordinator = models.BooleanField(default=False)
+    volunteer = models.BooleanField(default=False)
+    additional_info = models.TextField(blank=True, null=True)
+    
+    suggestions = models.TextField(blank=True, null=True)
+    
     ip = models.IPAddressField('IP Address', blank=True, null=True)
     
-    # GeoDjango
-    location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return u'%s' % (self.id)   
+    
+    class Meta:
+        verbose_name = 'Adult Survey'
+        verbose_name_plural = 'Adult Surveys' 
+
+
+class Schoolsurvey(models.Model):
+    """ School Survey """
+    
+    walkrideday = models.ForeignKey('Walkrideday')
+    
+    school = models.ForeignKey('School')
+    
+    home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
+    home_street = models.CharField(max_length=50, blank=True, null=True)
+    home_cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
+    
+    distance = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
+    duration = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
+    
+    sponsor = models.ManyToManyField('Sponsor', limit_choices_to = {'active': True})
+    
+    name = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    newsletter = models.BooleanField(default=False)
+    coordinator = models.BooleanField(default=False)
+    volunteer = models.BooleanField(default=False)
+    additional_info = models.TextField(blank=True, null=True)
+    
+    suggestions = models.TextField(blank=True, null=True)
+    
+    ip = models.IPAddressField('IP Address', blank=True, null=True)
+    
     objects = models.GeoManager()
     
     def __unicode__(self):
@@ -203,12 +273,23 @@ CHILD_DROPOFF = (
             )
     
 class Child(models.Model):
-    survey = models.ForeignKey('Survey')
+    """ A child that's checked in at a School """
+    
+    survey = models.ForeignKey('Schoolsurvey')
+    
     grade = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_GRADES)
-    to_school = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)
-    dropoff = models.CharField(max_length=3, blank=True, null=True, choices=CHILD_DROPOFF)
-    from_school = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)    
-    pickup = models.CharField(max_length=3, blank=True, null=True, choices=CHILD_DROPOFF)
+    
+    to_school_today = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)
+    dropoff_today = models.CharField(max_length=3, blank=True, null=True, choices=CHILD_DROPOFF)   
+    from_school_today = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)    
+    pickup_today = models.CharField(max_length=3, blank=True, null=True, choices=CHILD_DROPOFF)
+    
+    to_school_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)
+    dropoff_yesterday = models.CharField(max_length=3, blank=True, null=True, choices=CHILD_DROPOFF)   
+    from_school_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)    
+    pickup_yesterday = models.CharField(max_length=3, blank=True, null=True, choices=CHILD_DROPOFF)
+    
+    weight = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     
     class Meta:
         verbose_name_plural = 'Children'
@@ -217,19 +298,4 @@ class Child(models.Model):
         return u'%s' % (self.id)
     
 
-class Street(models.Model):
-    """
-    Streets to be returned as type-ahead in street-fields
-    to limit the variety of street names and make geocoding
-    more accurate.
-    """
-    name = models.CharField(max_length=240)
-    
-    town = models.ForeignKey('Town', blank=True, null=True)
-    districtid = models.ForeignKey('District', blank=True, null=True)
-    
-    geometry = models.MultiLineStringField(srid=26986)
-    objects = models.GeoManager()
-    
-    def __unicode__(self):
-        return self.name
+

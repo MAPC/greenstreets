@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load dbgettext_tags %}
 
 {% block javascript %}
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
@@ -216,24 +215,11 @@ $(document).ready(function() {
 
 {% if school %}
 	
-<h2>{{ school.name }}</h2>
+<h2>Check-in your child's commute to school</h2>
 
 <h3>
 	{% trans "Travel to School Survey" %} 
 </h3>
-
-<h4>
-	{% trans "Dear Parent or Guardian," %}
-</h4>
- 
-<p>
-{% blocktrans with school.name as schoolname %}
-{{ schoolname }} would like to learn how students get to and from school in order to plan safe and healthy walking options for students. 
-The survey will take less than 3 minutes to complete. Please complete one survey for <em>each</em> child at this school.
-{% endblocktrans %}
-</p>
-
-<p>{% trans "We appreciate your time and effort!" %}</p>
 
 <form id="surveyform" action="." method="POST">
 	

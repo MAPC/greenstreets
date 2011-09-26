@@ -1,4 +1,4 @@
-from survey.models import School, Survey, Child, District, Employer, Street
+from survey.models import School, Schoolsurvey, Child, Schooldistrict, Employer, Street, Adultsurvey, Walkrideday
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -22,6 +22,10 @@ class SchoolAdmin(admin.OSMGeoAdmin):
     
     def survey_count(self, obj):
         return obj.survey_set.count()
+
+
+class Adultsurveyadmin(admin.OSMGeoAdmin):
+    exclude = ('employer',)
     
 class SchoolsurveyAdmin(admin.OSMGeoAdmin):
     list_display = ('pk','school')
@@ -30,9 +34,11 @@ class SchoolsurveyAdmin(admin.OSMGeoAdmin):
 class ChildAdmin(admin.ModelAdmin):
     list_display = ('pk','survey')
 
-admin.site.register(District, DistrictAdmin)
+admin.site.register(Schooldistrict, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
-admin.site.register(Survey, SchoolsurveyAdmin)
+admin.site.register(Schoolsurvey, SchoolsurveyAdmin)
 admin.site.register(Child, ChildAdmin)
 admin.site.register(Employer, admin.OSMGeoAdmin)
 admin.site.register(Street, admin.OSMGeoAdmin)
+admin.site.register(Adultsurvey, Adultsurveyadmin)
+admin.site.register(Walkrideday, admin.ModelAdmin)

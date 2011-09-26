@@ -25,6 +25,16 @@ urlpatterns = patterns('',
     # static pages
     (r'^about/$', direct_to_template, {'template': 'survey/about.html'}),
     
+    # studentform
+    (r'^studentform/$', 'survey.views.student'),
+    
+    # adultform
+    (r'^adultform/$', 'survey.views.adult'),
+    
+    # get data
+    url(r'^town/(?P<slug>[-\w]+)/streets/$', 'survey.views.get_streets', {'regional_unit': 'town'}),
+    url(r'^town/(?P<slug>[-\w]+)/employers/$', 'survey.views.get_employers'),
+    
     # district
     (r'^(?P<district_slug>[-\w]+)/$', 'survey.views.district'),
     url(r'^(?P<districtid>[-\w]+)/schools/$', 'survey.views.get_schools', name='disctrict_get_schools'),

@@ -1,8 +1,8 @@
 import os
 from django.contrib.gis.utils import LayerMapping
-from models import School, District, Street, Town, Employer
+from models import School, Schooldistrict, Street, Town, Employer
 
-district_mapping = {
+schooldistrict_mapping = {
     'districtid': 'districtid',
     'distname': 'distname',
     'slug': 'slug',
@@ -13,14 +13,13 @@ district_mapping = {
     'geometry': 'MULTIPOLYGON',
 }
 
-districts_shp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'C:/gis/walkboston/districts.shp'))
+schooldistrict_shp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'C:/gis/walkboston/districts.shp'))
 
 def load_districts(verbose=True):
-    lm = LayerMapping(District, districts_shp, district_mapping,
+    lm = LayerMapping(Schooldistrict, schooldistrict_shp, schooldistrict_mapping,
                       transform=False, encoding='iso-8859-1')
 
     lm.save(strict=True, verbose=verbose)
-
 
 school_mapping = {
     'schid': 'schid',

@@ -46,7 +46,7 @@ $(document).ready(function() {
 {% block body %}
 <div class="row">
 	
-	<div class="span16 columns">
+	<div class="span16">
 		
 
 		<h1>Welcome to the Walk/Ride Day Pledge and Check-In!</h1>
@@ -65,38 +65,15 @@ $(document).ready(function() {
 
 	</div>
 	
-	<div class="span8 columns">
+	<div class="span6 offset2 center">
 		
-		<h2>School Check-In</h2>
-		
-		<h3>{% trans "Please select your school district:" %}</h3>
-		<p>Scroll or start typing your district name</p>
-		<div class="input index">
-			<select id="district-select" class="chzn-select" style="width: 350px;" tabindex="1">
-				{% for district in districts %}<option value="{{ district.districtid }}">{{ district.distname }}</option> {% endfor %}
-			</select>
-		</div>
-		
-		<h3>{% trans "Please select your school:" %}</h3>
-		<p>Scroll or start typing your school name</p>		
-		<div class="input index">
-			<select id="school-select" class="chzn-select" style="width: 350px;" tabindex="2"></select>
-		</div>
-		
-		<a id="open-survey" href="#" class="btn primary large" tabindex="3">Open School Survey Form</a>
+		<a href="/adultform/" class="btn primary large" tabindex="3">Check-in my own commute!</a>
 		
 	</div>
 	
-	<div class="span8 columns">
+	<div class="span6 center">
 		
-		<h2>Work-Place Check-In</h2>
-		<h3>Please select the town where you work:</h3>
-		<p>Scroll or start typing the town name</p>		
-		<div class="input index">
-			<select id="town-select" class="chzn-select" style="width: 350px;" tabindex="4"></select>
-		</div>
-		
-		<a id="open-employersurvey" href="#" class="btn primary large" tabindex="5">Open Employer Survey Form</a>
+		<a href="/studentform/" class="btn primary large" tabindex="5">Check-in my child's commute!</a>
 		
 	</div>
 	
