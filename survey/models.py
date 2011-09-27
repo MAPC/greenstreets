@@ -104,6 +104,8 @@ class Employer(models.Model):
     infousa_id = models.CharField(max_length=9, blank=True, null=True)
     town = models.ForeignKey('Town', blank=True, null=True)
     
+    listed = models.BooleanField()
+    
     geometry = models.PointField(srid=26986) # default SRS 4326
     objects = models.GeoManager()
     

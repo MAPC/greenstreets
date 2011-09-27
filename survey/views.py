@@ -29,7 +29,7 @@ def get_employers(request, slug):
     """
     
     town = get_object_or_404(Town.objects, slug=slug)
-    employers = Employer.objects.transform(4326).filter(town=town)
+    employers = Employer.objects.transform(4326).filter(town=town, listed=True)
      
     employer_list =[]
     
