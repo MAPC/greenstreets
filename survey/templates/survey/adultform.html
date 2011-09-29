@@ -160,7 +160,7 @@ $(document).ready(function() {
 			directionsService.route(request, function(result, status) {
 				if (status == google.maps.DirectionsStatus.OK) {
 					// EPA standard: 0.41kg CO2 per mile driven (convert to lbs and meters)
-					$("#saved_co2").text(Math.round(result.routes[0].legs[0].distance.value * legs * 0.41 * 2.20462262 / 1609.344));
+					$("#saved_co2").text(Math.round(result.routes[0].legs[0].distance.value * legs * 0.41 * 2.20462262 / 1609.344 + " lbs"));
 					$("#id_distance").val(result.routes[0].legs[0].distance.value * legs);
 				}
 			});
