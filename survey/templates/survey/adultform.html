@@ -62,7 +62,8 @@ $(document).ready(function() {
 	// track marker dragging		
 	google.maps.event.addListener(markerEmployer, 'dragend', function() {
 		// write loc coord to hidden geometry field (in WGS84)
-		$("#id_work_location").val("POINT (" + markerEmployer.position.lng() + " " +  markerEmployer.position.lat() + ")");
+		work = this.getPosition();
+		$("#id_work_location").val("POINT (" + this.position.lng() + " " +  this.position.lat() + ")");
 	});
 	
 	function toggleBounce() {
@@ -123,11 +124,15 @@ $(document).ready(function() {
 				$("#employer-select").change(function () {
     				var infousa_id = $("#employer-select option:selected").val();
     				// var name = $("#employer-select option:selected").text();
-    				var coords = employer_locations[infousa_id];
-    				var location = new google.maps.LatLng(coords.split(" ")[0], coords.split(" ")[1]);
-    				
-    				markerEmployer.setPosition(location)
-    				
+    				if (infousa_id === "") {
+    					$("#id_work_location").val("POINT (0.0000000000000000 0.0000000000000000)");
+    					work = map.getCenter();
+    				} else {
+    					var coords = employer_locations[infousa_id];
+    					work = new google.maps.LatLng(coords.split(" ")[0], coords.split(" ")[1]);
+    					$("#id_work_location").val("POINT (" + coords.split(" ")[1] + " " +  coords.split(" ")[0] + ")");
+    				}
+    				markerEmployer.setPosition(work);
     			});
     			// show select input
 				$("#employer_fields").show(500, function() {
