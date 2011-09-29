@@ -146,9 +146,10 @@ $(document).ready(function() {
 		var mode_from = $("#id_from_work_today option:selected").val();
 		
 		var legs = 2; // to and from work
-		if (mode_to === "cp" || mode_from === "cp") legs = 1;
-		if (mode_to === "cp" && mode_from === "cp") legs = 0;
-		if (mode_to === "" && mode_from === "") legs = 0;
+		var co2_modes = ["", "c", "cp"];
+		// jQuery.inArray(mode_to, co2_modes)
+		if (jQuery.inArray(mode_to, co2_modes) > -1 || jQuery.inArray(mode_from, co2_modes) > -1) legs = 1;
+		if (jQuery.inArray(mode_to, co2_modes) > -1 && jQuery.inArray(mode_from, co2_modes) > -1) legs = 0;
 		// get distance for car mode
 		if (legs !== 0) {
 	  		var request = {

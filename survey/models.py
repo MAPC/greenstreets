@@ -143,6 +143,7 @@ class Street(models.Model):
 
 
 ADULT_MODES = (
+            ('c', _('Car')),
             ('w', _('Walk')),
             ('b', _('Bike')),
             ('cp', _('Carpool')),
