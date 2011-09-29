@@ -35,7 +35,7 @@ $(document).ready(function() {
 	var iconHome = "{{ STATIC_URL }}img/home.png";
 	var markerHome = new google.maps.Marker({
 		map:map,
-		title:"Please drag & drop the marker to the intersection closest to your home",
+		title:"Please drag & drop the marker to the intersection closest to your home.",
 		draggable:true,
 		animation: google.maps.Animation.DROP,
 		position: home,
@@ -51,9 +51,10 @@ $(document).ready(function() {
 	var iconEmployer = "{{ STATIC_URL }}img/factory.png";
 	var markerEmployer = new google.maps.Marker({
 		map: map,
-		title: "your work place",
+		title: "Please drag the marker to the location of your work-place.",
 		position: work,
 		draggable: true,
+		animation: google.maps.Animation.DROP,
 		icon: iconEmployer
 	});
 	// animation
@@ -61,7 +62,8 @@ $(document).ready(function() {
 	// track marker dragging		
 	google.maps.event.addListener(markerEmployer, 'dragend', function() {
 		// write loc coord to hidden geometry field (in WGS84)
-		$("#id_work_location").val("POINT (" + markerEmployer.position.lng() + " " +  markerEmployer.position.lat() + ")");
+		work = this.getPosition();
+		$("#id_work_location").val("POINT (" + this.position.lng() + " " +  this.position.lat() + ")");
 	});
 	
 	function toggleBounce() {
@@ -122,11 +124,15 @@ $(document).ready(function() {
 				$("#employer-select").change(function () {
     				var infousa_id = $("#employer-select option:selected").val();
     				// var name = $("#employer-select option:selected").text();
-    				var coords = employer_locations[infousa_id];
-    				var location = new google.maps.LatLng(coords.split(" ")[0], coords.split(" ")[1]);
-    				
-    				markerEmployer.setPosition(location)
-    				
+    				if (infousa_id === "") {
+    					$("#id_work_location").val("POINT (0.0000000000000000 0.0000000000000000)");
+    					work = map.getCenter();
+    				} else {
+    					var coords = employer_locations[infousa_id];
+    					work = new google.maps.LatLng(coords.split(" ")[0], coords.split(" ")[1]);
+    					$("#id_work_location").val("POINT (" + coords.split(" ")[1] + " " +  coords.split(" ")[0] + ")");
+    				}
+    				markerEmployer.setPosition(work);
     			});
     			// show select input
 				$("#employer_fields").show(500, function() {
@@ -146,9 +152,10 @@ $(document).ready(function() {
 		var mode_from = $("#id_from_work_today option:selected").val();
 		
 		var legs = 2; // to and from work
-		if (mode_to === "cp" || mode_from === "cp") legs = 1;
-		if (mode_to === "cp" && mode_from === "cp") legs = 0;
-		if (mode_to === "" && mode_from === "") legs = 0;
+		var co2_modes = ["", "c", "cp"];
+		// jQuery.inArray(mode_to, co2_modes)
+		if (jQuery.inArray(mode_to, co2_modes) > -1 || jQuery.inArray(mode_from, co2_modes) > -1) legs = 1;
+		if (jQuery.inArray(mode_to, co2_modes) > -1 && jQuery.inArray(mode_from, co2_modes) > -1) legs = 0;
 		// get distance for car mode
 		if (legs !== 0) {
 	  		var request = {
@@ -293,12 +300,7 @@ $(document).ready(function() {
 		
 		<h3>Please tell us about your commute (<span class="required_field">required</span>):</h3>
 
-		<p>
-			{% blocktrans %}								
-			Please drag and drop the yellow home-marker to the location where you started your commute:
-			{% endblocktrans %}
-			
-		</p>
+		<p>Please drag and drop the yellow home-marker to the location where your commute started and the blue work-place marker to the location where it ended today.</p>
 		
 		<div id="map_canvas">map div</div>
 		<p id="map_legend" class="small"><img src="{{ STATIC_URL }}img/home.png" height="20" alt="Home marker" > ... {% blocktrans %}your home{% endblocktrans %} <img src="{{ STATIC_URL }}img/factory.png" height="20" alt="Home marker" > ... your work place</p>
@@ -324,7 +326,7 @@ $(document).ready(function() {
 				<label>Your home cross street:</label><div class="input">{{ adultform.home_cross_st }}</div>
 			</div>
 		</div>
-		
+		<h4> Please tell us about your work-place:</h4>
 		<div class="clearfix">
 			<label>Where do you work?</label>
 			<div class="input">
@@ -348,7 +350,7 @@ $(document).ready(function() {
 				<label>other: </label><div class="input">{{ adultform.other_employer }}</div>
 			</div>
 			<div class="clearfix">
-				<p>Please drag and drop the blue work-place-marker to the correct location if we got it wrong.</p>
+				<p>Please drag and drop the blue work-place-marker to the correct location if you entered an <em>other</em> employer, or if we got the location wrong.</p>
 			</div>
 		</div>
 		
@@ -358,6 +360,7 @@ $(document).ready(function() {
 		{{ adultform.duration }}
 		
 		<h3>How did you travel to and from work? (<span class="required_field">required</span>)</h3>
+
 		<div class="clearfix">
 			{{ adultform.to_work_today.errors }}
 			<label>To work today:</label> <div class="input">{{ adultform.to_work_today }}</div>
@@ -380,20 +383,20 @@ $(document).ready(function() {
 		
 	<fieldset>
 		
-		<h3>Your impact</h3>
+		<h3>Your impact today:</h3>
 		
 		<div class="clearfix">
-			<label>Saved CO2 emissions:</label> <div id="saved_co2" class="uneditable-input"></div>
-			<span class="help-block impact">Per EPA standards and assumptions.</span>
+			<label>Saved CO2 emissions:</label> <div id="saved_co2" class="uneditable-input">Click button to calculate</div>
 			<button id="button_co2" class="btn impact">Calculate CO2</button>
+			<span class="help-block impact">Per EPA standards and assumptions.</span>
 		</div>
 		
 		<div class="clearfix">
 			{{ adultform.weight.errors }}
 			<label>Your weight [lbs]:</label> <div class="input">{{ adultform.weight }}</div>
-			<label>Your burned calories:</label> <div id="burned_calories" class="uneditable-input"></div>
-			<span class="help-block impact">Per <a href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a></span>
+			<label>Your burned calories:</label> <div id="burned_calories" class="uneditable-input">Click button to calculate</div>
 			<button id="button_calories" class="btn impact">Calculate Calories</button>
+			<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a></span>
 		</div>
 	</fieldset>
 	
@@ -407,7 +410,7 @@ $(document).ready(function() {
 	</fieldset>
 	
     <fieldset>
-    	<h3>Contact information (will not share)</h3>
+    	<h3>Contact information (we will not share):</h3>
     	<div class="clearfix">
     		{{ adultform.name.errors }}
 			<label>Your name (optional)</label><div class="input">{{ adultform.name }}</div>
@@ -423,7 +426,7 @@ $(document).ready(function() {
     </fieldset>
     
     <fieldset>
-    	<h3>Getting involved</h3>
+    	<h3>Getting involved:</h3>
     	<div class="clearfix">
     		{{ adultform.coordinator.errors }}
 			<label>I would like to become a Walk/Ride Day coordinator for my company, school, or other organization (specify organization's name below)</label><div class="input">{{ adultform.coordinator }}</div>
@@ -439,7 +442,7 @@ $(document).ready(function() {
     </fieldset>
     
     <fieldset>
-    	<h3>Please use the space below to share additional thoughts or feedback. We are always interested in knowing how Walk/Ride Day has affected your lifestyle, decisions and experiences.</h3>
+    	<h3>Please use the space below to share additional thoughts or feedback. We are always interested in knowing how Walk/Ride Day has affected your lifestyle, decisions and experiences:</h3>
     	<div class="clearfix">
     		{{ adultform.suggestions.errors }}
 			<label>Feedback:</label><div class="input">{{ adultform.suggestions }}</div>
