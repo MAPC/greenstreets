@@ -29,7 +29,7 @@ urlpatterns = patterns('',
     (r'^studentform/$', 'survey.views.student'),
     
     # adultform
-    (r'^adultform/$', 'survey.views.adult'),
+    (r'^workform/$', 'survey.views.adult'),
     
     # get data
     url(r'^town/(?P<slug>[-\w]+)/streets/$', 'survey.views.get_streets', {'regional_unit': 'town'}),
