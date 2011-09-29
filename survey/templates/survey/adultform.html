@@ -216,40 +216,42 @@ $(document).ready(function() {
 			default:
 				var mets_from = 0;
 		}
-		// id_duration
-		if (mets_to !== 0) {
-	  		var request_to = {
-				origin: markerHome.getPosition(),
-				destination: markerEmployer.getPosition(),
-				unitSystem: google.maps.UnitSystem.METRIC,
-				travelMode: travelmode_to
-			};
-			directionsService.route(request_to, function(result, status) {
-				if (status == google.maps.DirectionsStatus.OK) {
-					duration += result.routes[0].legs[0].duration.value;
-					//calories = (mets/2.2) * weight * hours duration
-					calories += duration / 3600 * weight * mets_to / 2.2;
-					$("#burned_calories").text(Math.round(calories));
-					$("#id_duration").val(duration);
-				}
-			});
-		}
-		if (mets_from !== 0) {
-	  		var request_from = {
-				origin: markerHome.getPosition(),
-				destination: markerEmployer.getPosition(),
-				unitSystem: google.maps.UnitSystem.METRIC,
-				travelMode: travelmode_from
-			};
-			directionsService.route(request_from, function(result, status) {
-				if (status == google.maps.DirectionsStatus.OK) {
-					duration += result.routes[0].legs[0].duration.value;
-					//calories = (mets/2.2) * weight * hours duration
-					calories += duration / 3600 * weight * mets_from / 2.2;
-					$("#burned_calories").text(Math.round(calories));
-					$("#id_duration").val(duration);
-				}
-			});
+		if (weight > 0) {
+			// id_duration
+			if (mets_to !== 0) {
+		  		var request_to = {
+					origin: markerHome.getPosition(),
+					destination: markerEmployer.getPosition(),
+					unitSystem: google.maps.UnitSystem.METRIC,
+					travelMode: travelmode_to
+				};
+				directionsService.route(request_to, function(result, status) {
+					if (status == google.maps.DirectionsStatus.OK) {
+						duration += result.routes[0].legs[0].duration.value;
+						//calories = (mets/2.2) * weight * hours duration
+						calories += duration / 3600 * weight * mets_to / 2.2;
+						$("#burned_calories").text(Math.round(calories));
+						$("#id_duration").val(duration);
+					}
+				});
+			}
+			if (mets_from !== 0) {
+		  		var request_from = {
+					origin: markerHome.getPosition(),
+					destination: markerEmployer.getPosition(),
+					unitSystem: google.maps.UnitSystem.METRIC,
+					travelMode: travelmode_from
+				};
+				directionsService.route(request_from, function(result, status) {
+					if (status == google.maps.DirectionsStatus.OK) {
+						duration += result.routes[0].legs[0].duration.value;
+						//calories = (mets/2.2) * weight * hours duration
+						calories += duration / 3600 * weight * mets_from / 2.2;
+						$("#burned_calories").text(Math.round(calories));
+						$("#id_duration").val(duration);
+					}
+				});
+			}
 		}
 		if (calories === 0) $("#burned_calories").text("No burned calories today");
 		return false;
