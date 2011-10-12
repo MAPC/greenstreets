@@ -263,6 +263,15 @@ $(document).ready(function() {
 	});
 	// form validation
 	$("#adultform").submit(function() {
+		
+		// check for valid email
+		var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+		if (emailReg.test($("#id_email").val()) === false) {
+			$("#form_error_msg").html("<p>Please provide a valid email address.</p>");
+			$("#form_error_modal").modal("show");
+			return false;
+		}
+
 		// check locations
 		if ($("#id_home_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
 			// no marker and no intersection
