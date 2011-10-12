@@ -187,9 +187,8 @@ class Adultsurvey(models.Model):
     newsletter = models.BooleanField(default=False)
     coordinator = models.BooleanField(default=False)
     volunteer = models.BooleanField(default=False)
-    additional_info = models.TextField(blank=True, null=True)
     
-    suggestions = models.TextField(blank=True, null=True)
+    feedback = models.TextField(blank=True, null=True)
     
     ip = models.IPAddressField('IP Address', blank=True, null=True)
     

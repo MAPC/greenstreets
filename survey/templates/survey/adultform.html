@@ -97,7 +97,7 @@ $(document).ready(function() {
     });
     
     // select employer
-    $("#employer_fields").hide();
+    // $("#employer_fields").hide();
 
     $("#work-town-select").change(function() {
     	var town = $("#work-town-select option:selected").val();
@@ -252,8 +252,13 @@ $(document).ready(function() {
 					}
 				});
 			}
+			if (mets_from === 0 && mets_to === 0) { 
+				// car or transit doesn't burn calories
+				$("#burned_calories").text("Too few calories burned today, try walking, biking or other active transportation modes!");
+			}
+		} else {
+			$("#burned_calories").text("Please enter your weight in the above field");
 		}
-		if (calories === 0) $("#burned_calories").text("No burned calories today");
 		return false;
 	});
 	
@@ -301,52 +306,91 @@ $(document).ready(function() {
 
 {% block body %}
 
-<h2>Check-in your commute to work</h2>
+<a href="http://www.gogreenstreets.org/" target="_blank" title="Green Streets Initiative"><img id="logo" src="{{ STATIC_URL }}img/logo-greenstreets.png" height="218" width="124" alt="Green Streets Initiative"></a>
+
+<h2>Check-in your commute to work!</h2>
+
+<p>A check-in helps us to see the impact of our initiative and involves only 2 required and 2 optional quick steps.</p>
+
+<p>By providing information about your commute you can calculate the impact your had today. The blue hightlighted section allows you to calculate the CO<sub>2</sub> emissions you saved compared to a car-ride, if you chose not drive to work, today and to see your burned calories if you commuted by walking, biking or another active mode.</p>
 
 <form id="adultform" action="." method="POST">
 	
 	{% csrf_token %}
 
 	<fieldset>
-		
-		<h3>Please tell us about your commute (<span class="required_field">required</span>):</h3>
+    	<h3>1. Please tell us about yourself:</h3>
+    	<div class="clearfix">
+			<label>Your name (optional)</label><div class="input">{{ adultform.name }}</div>
+		</div>
+		<div class="clearfix">
+			<label>Your email (<span class="required_field">required</span>)</label><div class="input">{{ adultform.email }}<span class="help-block">We respect your privacy and won't share any information.</span></div>
+		</div>
+		<div class="clearfix">
+			<div class="input">{{ adultform.newsletter }} <span>I would like to subscribe to your monthly newsletter.</span></div> 
+		</div>
+    </fieldset>
 
-		<p>Please drag and drop the yellow home-marker to the location where your commute started and the blue work-place marker to the location where it ended today.</p>
+	<fieldset>
+		
+		<h3>2. Please tell us about your commute (<span class="required_field">required</span>):</h3>
+
+		<p>Please drag and drop the yellow home-marker to the location where your commute started and the blue work-place-marker to the location where it ended today.</p>
 		
 		<div id="map_canvas">map div</div>
 		<p id="map_legend" class="small"><img src="{{ STATIC_URL }}img/home.png" height="20" alt="Home marker" > ... {% blocktrans %}your home{% endblocktrans %} <img src="{{ STATIC_URL }}img/factory.png" height="20" alt="Home marker" > ... your work place</p>
 		
-		<p><a href="#" id="intersection_fields_link">{% trans "...or tell us the street intersection closest to your commute starting point." %}</a></p>
-				
-		<div id="intersection_fields">
-			<div class="clearfix">
-				<label>Where do you live?</label>
-				<div class="input">
-					<select id="home-town-select" tabindex="1">
-						<option selected="selected" value="">---------</option>
-						{% for town in towns %}<option value="{{ town.slug }}">{{ town.name }}</option> {% endfor %}
-					</select>
-				</div>
-			</div>
-			<div class="clearfix">
-				{{ adultform.home_street.errors }}
-				<label>Your home street:</label> <div class="input">{{ adultform.home_street }}</div>
-			</div>
-			<div class="clearfix">
-				{{ adultform.home_cross_st.errors }}
-				<label>Your home cross street:</label><div class="input">{{ adultform.home_cross_st }}</div>
-			</div>
-		</div>
-		<h4> Please tell us about your work-place:</h4>
+		<p>Or use the address fields below to locate both markers in the map:</p>
+
 		<div class="clearfix">
-			<label>Where do you work?</label>
-			<div class="input">
-				<select id="work-town-select" tabindex="1">
-					<option selected="selected" value="">---------</option>
-					{% for town in towns %}<option value="{{ town.slug }}">{{ town.name }}</option> {% endfor %}
-				</select>
-			</div>
+			<label>Enter your home address:</label><div class="input"><input type="text" id="home-address" /><img src="{{ STATIC_URL }}img/home.png" height="26" alt="Home marker" class="marker"> <button id="locate_home" class="btn">Locate</button></div>
 		</div>
+		<div class="clearfix">
+			<label>Enter your work address:</label><div class="input"><img src="{{ STATIC_URL }}img/factory.png" height="26" alt="Home marker" class="marker"> <input type="text" id="work-address" /> <button id="locate_work" class="btn">Locate</button></div>
+		</div>
+	
+		{{ adultform.home_location }}
+		{{ adultform.work_location }}
+		{{ adultform.distance }}
+		{{ adultform.duration }}
+		
+		<h4>How did you commute (<span class="required_field">required</span>)?</h3>
+
+		<div class="clearfix">
+			<label>To work today:</label> <div class="input">{{ adultform.to_work_today }}</div>
+			<label>From work today:</label><div class="input">{{ adultform.from_work_today }}</div>
+		</div>
+
+		<div class="clearfix">
+			<label>To work yesterday:</label> <div class="input">{{ adultform.to_work_yesterday }}</div>
+			<label>From work yesterday:</label><div class="input">{{ adultform.from_work_yesterday }}</div>
+		</div>
+
+		<div class="alert-message block-message info">
+
+			<h4>See your impact you had today:</h4>
+			
+			<div class="clearfix">
+				<label>Saved CO<sub>2</sub> emissions:</label> <div class="input" id="saved_co2">Click button below to calculate</div>
+				<button id="button_co2" class="btn impact">Calculate CO2</button>
+				<span class="help-block impact">Per EPA standards and assumptions.</span>
+			</div>
+			
+			<div class="clearfix">
+				{{ adultform.weight.errors }}
+				<label>Your weight [lbs]:</label> <div class="input">{{ adultform.weight }}</div>
+				<label>Your burned calories:</label> <div id="burned_calories" class="input">Enter your weight and click button below to calculate</div>
+				<button id="button_calories" class="btn impact">Calculate Calories</button>
+				<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a></span>
+			</div>
+
+		</div>
+		
+	</fieldset>
+		
+	<fieldset>
+		
+		<h3>3. Please tell us where you work:</h3>
 		
 		<div id="employer_fields">
 			<div class="clearfix">
@@ -360,108 +404,37 @@ $(document).ready(function() {
 			<div class="clearfix">
 				<label>other: </label><div class="input">{{ adultform.other_employer }}</div>
 			</div>
+			<p>Please drag and drop the blue work-place-marker to the correct location if you entered an <em>other</em> employer.</p>
 			<div class="clearfix">
-				<p>Please drag and drop the blue work-place-marker to the correct location if you entered an <em>other</em> employer, or if we got the location wrong.</p>
+				
 			</div>
 		</div>
-		
-		{{ adultform.home_location }}
-		{{ adultform.work_location }}
-		{{ adultform.distance }}
-		{{ adultform.duration }}
-		
-		<h3>How did you travel to and from work? (<span class="required_field">required</span>)</h3>
+
+	</fieldset>
+	
+	<fieldset>
+
+		<h3>4. Get involved!</h3>
 
 		<div class="clearfix">
-			{{ adultform.to_work_today.errors }}
-			<label>To work today:</label> <div class="input">{{ adultform.to_work_today }}</div>
-		</div>
-		<div class="clearfix">
-			{{ adultform.from_work_today.errors }}
-			<label>From work today:</label><div class="input">{{ adultform.from_work_today }}</div>
+			<label>Green Streets sponsors offer freebies, discounts, and raffles. Will you take advantage at any of our sponsoring businesses?</label><div class="input">{{ adultform.sponsor }}</div>
 		</div>
 
 		<div class="clearfix">
-			{{ adultform.to_work_yesterday.errors }}
-			<label>To work yesterday:</label> <div class="input">{{ adultform.to_work_yesterday }}</div>
+			<div class="input">{{ adultform.coordinator }} I would like to become a Walk/Ride Day coordinator for my company, school or other organization.</div>
 		</div>
 		<div class="clearfix">
-			{{ adultform.from_work_yesterday.errors }}
-			<label>From work yesterday:</label><div class="input">{{ adultform.from_work_yesterday }}</div>
+			<div class="input">{{ adultform.volunteer }} I would like to help Green Streets by volunteering in another capacity.</div>
 		</div>
-		
-	</fieldset>
-		
-	<fieldset>
-		
-		<h3>Your impact today:</h3>
-		
+
 		<div class="clearfix">
-			<label>Saved CO2 emissions:</label> <div id="saved_co2" class="uneditable-input">Click button to calculate</div>
-			<button id="button_co2" class="btn impact">Calculate CO2</button>
-			<span class="help-block impact">Per EPA standards and assumptions.</span>
+			<label>Additional thoughts or feedback:</label><div class="input">{{ adultform.feedback }}</div>
 		</div>
-		
-		<div class="clearfix">
-			{{ adultform.weight.errors }}
-			<label>Your weight [lbs]:</label> <div class="input">{{ adultform.weight }}</div>
-			<label>Your burned calories:</label> <div id="burned_calories" class="uneditable-input">Click button to calculate</div>
-			<button id="button_calories" class="btn impact">Calculate Calories</button>
-			<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a></span>
-		</div>
-	</fieldset>
-	
-	
-	<fieldset>
-		<h3>Did/will you take advantage of Walk/Ride Day freebies, discounts or raffles at any of our sponsors?</h3>
-		<div class="clearfix">
-			{{ adultform.sponsor.errors }}
-			<label>If yes, which sponsor(s) did you patronize?</label><div class="input">{{ adultform.sponsor }}</div>
-		</div>
-	</fieldset>
-	
-    <fieldset>
-    	<h3>Contact information (we will not share):</h3>
-    	<div class="clearfix">
-    		{{ adultform.name.errors }}
-			<label>Your name (optional)</label><div class="input">{{ adultform.name }}</div>
-		</div>
-		<div class="clearfix">
-			{{ adultform.email.errors }}
-			<label>Email (required for raffle)</label><div class="input">{{ adultform.email }}</div>
-		</div>
-		<div class="clearfix">
-			{{ adultform.newsletter.errors }}
-			<label>Subscribe to our monthly newsletter?</label><div class="input">{{ adultform.newsletter }}</div>
-		</div>
-    </fieldset>
-    
-    <fieldset>
-    	<h3>Getting involved:</h3>
-    	<div class="clearfix">
-    		{{ adultform.coordinator.errors }}
-			<label>I would like to become a Walk/Ride Day coordinator for my company, school, or other organization (specify organization's name below)</label><div class="input">{{ adultform.coordinator }}</div>
-		</div>
-		<div class="clearfix">
-			{{ adultform.volunteer.errors }}
-			<label>I would like to help Green Streets by volunteering in another capacity. (specify how, and please leave your phone number, below)</label><div class="input">{{ adultform.volunteer }}</div>
-		</div>
-		<div class="clearfix">
-			{{ adultform.additional_info.errors }}
-			<label>Additional info:</label><div class="input">{{ adultform.additional_info }}</div>
-		</div>
-    </fieldset>
-    
-    <fieldset>
-    	<h3>Please use the space below to share additional thoughts or feedback. We are always interested in knowing how Walk/Ride Day has affected your lifestyle, decisions and experiences:</h3>
-    	<div class="clearfix">
-    		{{ adultform.suggestions.errors }}
-			<label>Feedback:</label><div class="input">{{ adultform.suggestions }}</div>
-		</div>
-    </fieldset>	
-	
+
+	</fieldset>	
+
 	<button id="button_submit" type="submit" class="btn large primary">Check-in your commute!</button>
-	
+
 </form>
 
 <div id="form_error_modal" class="modal hide fade">

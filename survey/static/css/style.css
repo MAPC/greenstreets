@@ -7,7 +7,7 @@ footer {
 label {
 	width: 240px;
 }
-div.input, div.uneditable-input, button.impact, .impact.help-block {
+div.input, div.uneditable-input, button.impact, .impact.help-block, #button_submit {
     margin-left: 260px;
 }
 
@@ -41,6 +41,20 @@ span.required_field {
 .center {
 	text-align: center;
 	margin-top: 20px;
+}
+
+#saved_co2, #burned_calories {
+	margin-top: 2px;
+	font-weight: bold;
+}
+
+.input .marker {
+	float: left;
+    margin-right: 4px;
+}
+
+#logo {
+	float: right;
 }
 
 
