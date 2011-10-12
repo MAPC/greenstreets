@@ -101,7 +101,7 @@ class Employer(models.Model):
     """ Employer list to choose from """
     name = models.CharField(max_length=30, blank=True, null=True)
     address = models.CharField(max_length=30, blank=True, null=True)
-    infousa_id = models.CharField(max_length=9, blank=True, null=True)
+    infousa_id = models.CharField(unique=True, max_length=9, blank=True, null=True)
     town = models.ForeignKey('Town', blank=True, null=True)
     
     listed = models.BooleanField()
@@ -164,7 +164,7 @@ class Adultsurvey(models.Model):
     home_street = models.CharField(max_length=50, blank=True, null=True)
     home_cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
     
-    employer = models.ForeignKey('Employer', blank=True, null=True)
+    employer = models.ForeignKey('Employer', to_field='infousa_id', blank=True, null=True)
     other_employer = models.CharField(max_length=50, blank=True, null=True)
     work_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)')
     work_street = models.CharField(max_length=50, blank=True, null=True)

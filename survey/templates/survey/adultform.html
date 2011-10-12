@@ -114,15 +114,15 @@ $(document).ready(function() {
     		
     		$.getJSON("/town/" + town + "/employers/", function(employers) {
     			// clear previouse dropdown options
-				$("#employer-select option").remove();
-				$("<option selected='selected' value=''>---------</option>").appendTo("#employer-select");
+				$("#id_employer option").remove();
+				$("<option selected='selected' value=''>---------</option>").appendTo("#id_employer");
     			$.each(employers, function(key, employer) {
-					$("<option value='" + employer.infousa_id + "'>" + employer.name + "</option>").appendTo("#employer-select");
+					$("<option value='" + employer.infousa_id + "'>" + employer.name + "</option>").appendTo("#id_employer");
 					employer_locations[employer.infousa_id] = employer.latlon;
 				});
 				// bind change event to select input
-				$("#employer-select").change(function () {
-    				var infousa_id = $("#employer-select option:selected").val();
+				$("#id_employer").change(function () {
+    				var infousa_id = $("#id_employer option:selected").val();
     				// var name = $("#employer-select option:selected").text();
     				if (infousa_id === "") {
     					$("#id_work_location").val("POINT (0.0000000000000000 0.0000000000000000)");
@@ -352,7 +352,7 @@ $(document).ready(function() {
 			<div class="clearfix">
 				<label>Please select your place of work:</label>
 				<div class="input">
-					<select id="employer-select" tabindex="2">
+					<select id="id_employer" name="employer" tabindex="2">
 						<option selected="selected" value="">---------</option>
 					</select>
 				</div>
