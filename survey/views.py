@@ -9,6 +9,19 @@ from django.forms.models import inlineformset_factory
 from survey.models import School, Studentsurvey, Child, Schooldistrict, Street, Town, Adultsurvey, Employer, Walkrideday
 from survey.forms import StudentForm, ChildForm, AdultForm
 
+
+def process_request(request):
+    """ 
+    Sets 'REMOTE_ADDR' based on 'HTTP_X_FORWARDED_FOR', if the latter is
+    set.
+    Based on http://djangosnippets.org/snippets/1706/
+    """
+    if 'HTTP_X_FORWARDED_FOR' in request.META:
+        ip = request.META['HTTP_X_FORWARDED_FOR'].split(",")[0].strip()
+        request.META['REMOTE_ADDR'] = ip
+    return request
+
+
 def index(request):
     
     return render_to_response('survey/index.html', locals(), context_instance=RequestContext(request))
@@ -81,7 +94,12 @@ def get_streets(request, slug, regional_unit):
     return HttpResponse(simplejson.dumps(street_list), mimetype='application/json')
 
 def student(request):
-    
+    """
+    Renders Studentform or saves it and related Childforms in case of POST request. 
+    """
+
+    request = process_request(request)
+
     # check if district exists
     districts = Schooldistrict.objects.filter(school__survey_active=True).distinct()
 
@@ -113,12 +131,17 @@ def student(request):
         return render_to_response('survey/studentform.html', locals(), context_instance=RequestContext(request))
 
 def adult(request):
-    
+    """
+    Renders Commuterform or saves it in case of POST request. 
+    """
+
+    request = process_request(request)
+
     adultsurvey = Adultsurvey()
-    
+
     if request.method == 'POST':
         adultform = AdultForm(request.POST, instance=adultsurvey)
-        adultsurvey.ip = request.META['REMOTE_ADDR'] 
+        adultsurvey.ip = request.META['REMOTE_ADDR']
         adultsurvey.walkrideday = Walkrideday.objects.filter(active=True).order_by('-date')[0]
         if adultform.is_valid():
             adultform.save()
@@ -130,4 +153,3 @@ def adult(request):
         adultform = AdultForm(instance=adultsurvey)
         towns = Town.objects.filter(survey_active=True)
         return render_to_response('survey/adultform.html', locals(), context_instance=RequestContext(request))
-
