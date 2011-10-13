@@ -3,6 +3,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
+from django.contrib.gis.geos import fromstr
 
 from django.forms.models import inlineformset_factory
 
@@ -36,14 +37,10 @@ def district(request, district_slug):
             },
             context_instance=RequestContext(request))
 
-def get_employers(request, slug):
+def get_employer_list(employers):
     """
-    Returns all employers and their location for a given town
+    Translates a given employer query object to a list containing employer objects with selected properties.
     """
-    
-    town = get_object_or_404(Town.objects, slug=slug)
-    employers = Employer.objects.transform(4326).filter(town=town, listed=True)
-     
     employer_list =[]
     
     for employer in employers:
@@ -51,6 +48,34 @@ def get_employers(request, slug):
         employer_location = "%f %f" % (employer.geometry.y, employer.geometry.x)
         employer_detail = dict(name = employer_name, latlon = employer_location, infousa_id = employer.infousa_id, )
         employer_list.append(employer_detail)
+
+    return employer_list
+
+def get_employers(request):
+    """
+    Accepts lat, lon and radius parameters and returns a JSON object of found employers
+    """
+
+    location = fromstr('POINT(%s %s)' % (request.GET['lng'], request.GET['lat']), srid=4326)
+
+    radius = float(request.GET['radius'])
+
+    # search for employers within radius and order by distance, limit to 500
+    employers = Employer.objects.transform(4326).filter(geometry__distance_lte=(location, radius)).distance(location).order_by('distance')[:500]
+
+    employer_list = get_employer_list(employers)
+    
+    return HttpResponse(simplejson.dumps(employer_list), mimetype='application/json')
+
+def get_town_employers(request, slug):
+    """
+    Returns all employers and their location for a given town
+    """
+    
+    town = get_object_or_404(Town.objects, slug=slug)
+    employers = Employer.objects.transform(4326).filter(town=town)[:500]
+     
+    employer_list = get_employer_list(employers)
     
     return HttpResponse(simplejson.dumps(employer_list), mimetype='application/json')
 

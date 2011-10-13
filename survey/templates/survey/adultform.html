@@ -64,6 +64,11 @@ $(document).ready(function() {
 		// write loc coord to hidden geometry field (in WGS84)
 		work = this.getPosition();
 		$("#id_work_location").val("POINT (" + this.position.lng() + " " +  this.position.lat() + ")");
+		getEmployers({
+			'lat': work.lat(), 
+			'lng': work.lng(),
+			'radius': 1609.344 // in meters
+		});
 	});
 	
 	var toggleBounce = function () {
@@ -277,11 +282,23 @@ $(document).ready(function() {
 		map.fitBounds(mapbounds);
 	}
 
-	// geocode given address and move markers on map
+	// trigger geocoding given address and move markers on map
 	$("#locate_home, #locate_work").click(function() {
-		
 		// home or work
 		var address_type = this.id.split("_")[1];
+		geocodeAddress(address_type);
+	});
+	$("#home-address, #work-address").keyup(function(e) {
+		// key = enter
+        if(e.which == 13) {
+        	// home or work
+        	var address_type = this.id.split("-")[0];
+			geocodeAddress(address_type);
+        }
+    });
+
+    // calls Google's geocoder, queries employers and moves marker
+	var geocodeAddress = function(address_type) {
 
 		var geocoder = new google.maps.Geocoder();
 		var address = $("#" + address_type + "-address").val();
@@ -301,16 +318,11 @@ $(document).ready(function() {
 					$("#id_work_location").val("POINT (" + markerEmployer.position.lng() + " " +  markerEmployer.position.lat() + ")");
 					setMapBounds([markerHome.position, markerEmployer.position]);
 					// search for employers
-					// MAPC: 42.354954 -71.06155000000001
-					/*
-					$.get("/employers/", { 
+					getEmployers({
 						'lat': work.lat(), 
-						'lng': work.lng()
-					},
-					function(employers){
-						console.log(employers);
-					}, "json");
-					*/
+						'lng': work.lng(),
+						'radius': 1609.344 // in meters
+					});
 				}		
 										
 			} else {
@@ -318,8 +330,40 @@ $(document).ready(function() {
 				$("#form_error_modal").modal("show");
 			}
 		});
-		
-	});
+	}
+
+	// get employer JSON based on a location
+	// data = { 'lat': latitute, 'lng': longitude, 'radius': radius in meters }
+	var getEmployers = function (data) {
+	
+		var employer_locations = {};
+		$.get("/employers/", data,
+		function(employers){
+			
+			var employer_locations = {};
+
+			// clear previouse dropdown options and events
+			$("#id_employer").unbind();
+			$("#id_employer option").remove();
+			// build dropdown
+			$("<option selected='selected' value=''>---------</option>").appendTo("#id_employer");
+			$.each(employers, function(key, employer) {
+				$("<option value='" + employer.infousa_id + "'>" + employer.name + "</option>")
+				.data('latlon', employer.latlon)
+				.appendTo("#id_employer");
+			});
+			// bind change event to select input
+			$("#id_employer").change(function () {
+				var latlon = $("#id_employer option:selected").data('latlon');
+				if (latlon !== undefined) {
+					work = new google.maps.LatLng(latlon.split(" ")[0], latlon.split(" ")[1]);
+					$("#id_work_location").val("POINT (" + latlon.split(" ")[1] + " " + latlon.split(" ")[0] + ")");
+					markerEmployer.setPosition(work);
+					setMapBounds([markerHome.position, markerEmployer.position]);
+				}
+			});
+		}, "json");
+	}
 
 	// form validation
 	$("#adultform").submit(function() {
@@ -398,7 +442,7 @@ $(document).ready(function() {
 		<p>Or use the address fields below to locate both markers in the map:</p>
 
 		<div class="clearfix">
-			<label>Enter your home address:</label><div class="input"><input type="text" id="home-address" /><img src="{{ STATIC_URL }}img/home.png" height="26" alt="Home marker" class="marker"> <a id="locate_home" class="btn">Locate</a></div>
+			<label>Enter your home address:</label><div class="input"><img src="{{ STATIC_URL }}img/home.png" height="26" alt="Home marker" class="marker"> <input type="text" id="home-address" /> <a id="locate_home" class="btn">Locate</a></div>
 		</div>
 		<div class="clearfix">
 			<label>Enter your work address:</label><div class="input"><img src="{{ STATIC_URL }}img/factory.png" height="26" alt="Home marker" class="marker"> <input type="text" id="work-address" /> <a id="locate_work" class="btn">Locate</a></div>
