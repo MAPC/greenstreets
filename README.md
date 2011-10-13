@@ -8,15 +8,23 @@ MAPC Project team: Mariana Arcaya, Tim Reardon, Christian Spanring
 
 ## Dependencies
 
-Install requirements 
+Install pip-requirements with
 
 	$ pip install -r requirements.txt
 
-Get submodules (Bootstrap framework)
+Get git-submodules...
 
 	$ git submodule init
 	$ git submodule update
 
+...for following projects:
+
+* [Bootstrap]
+* [Chosen]
+
 ---
 
 Copyright 2011 MAPC
+
+[Bootstrap]: http://twitter.github.com/bootstrap/
+[Chosen]: http://harvesthq.github.com/chosen/
