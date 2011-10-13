@@ -66,7 +66,7 @@ $(document).ready(function() {
 		$("#id_work_location").val("POINT (" + this.position.lng() + " " +  this.position.lat() + ")");
 	});
 	
-	function toggleBounce() {
+	var toggleBounce = function () {
 		if (markerH.getAnimation() != null) {
 			markerH.setAnimation(null);
 		} else {
@@ -261,11 +261,66 @@ $(document).ready(function() {
 		}
 		return false;
 	});
-	
+
 	// error modal
 	$("#form_error_modal").modal({
 		backdrop: true
 	});
+
+	// receives an array of points and adjusts the map extent accordingly
+	var setMapBounds = function (points) {
+		
+		var mapbounds = new google.maps.LatLngBounds();
+		$.each(points, function(index, point) { 
+			mapbounds.extend(point);
+		});
+		map.fitBounds(mapbounds);
+	}
+
+	// geocode given address and move markers on map
+	$("#locate_home, #locate_work").click(function() {
+		
+		// home or work
+		var address_type = this.id.split("_")[1];
+
+		var geocoder = new google.maps.Geocoder();
+		var address = $("#" + address_type + "-address").val();
+		
+		geocoder.geocode( { 'address': address }, function(results, status) {
+			if (status == google.maps.GeocoderStatus.OK) {
+
+				if (address_type === "home") {
+					home = results[0].geometry.location;
+					markerHome.setPosition(home);
+					$("#id_home_location").val("POINT (" + markerHome.position.lng() + " " +  markerHome.position.lat() + ")");
+					setMapBounds([markerHome.position, markerEmployer.position]);
+				}
+				if (address_type === "work") {
+					work = results[0].geometry.location;
+					markerEmployer.setPosition(work);
+					$("#id_work_location").val("POINT (" + markerEmployer.position.lng() + " " +  markerEmployer.position.lat() + ")");
+					setMapBounds([markerHome.position, markerEmployer.position]);
+					// search for employers
+					// MAPC: 42.354954 -71.06155000000001
+					/*
+					$.get("/employers/", { 
+						'lat': work.lat(), 
+						'lng': work.lng()
+					},
+					function(employers){
+						console.log(employers);
+					}, "json");
+					*/
+				}		
+										
+			} else {
+				$("#form_error_msg").html("<p>Sorry, we couldn't find your address.</p>");
+				$("#form_error_modal").modal("show");
+			}
+		});
+		
+	});
+
 	// form validation
 	$("#adultform").submit(function() {
 		
@@ -343,10 +398,10 @@ $(document).ready(function() {
 		<p>Or use the address fields below to locate both markers in the map:</p>
 
 		<div class="clearfix">
-			<label>Enter your home address:</label><div class="input"><input type="text" id="home-address" /><img src="{{ STATIC_URL }}img/home.png" height="26" alt="Home marker" class="marker"> <button id="locate_home" class="btn">Locate</button></div>
+			<label>Enter your home address:</label><div class="input"><input type="text" id="home-address" /><img src="{{ STATIC_URL }}img/home.png" height="26" alt="Home marker" class="marker"> <a id="locate_home" class="btn">Locate</a></div>
 		</div>
 		<div class="clearfix">
-			<label>Enter your work address:</label><div class="input"><img src="{{ STATIC_URL }}img/factory.png" height="26" alt="Home marker" class="marker"> <input type="text" id="work-address" /> <button id="locate_work" class="btn">Locate</button></div>
+			<label>Enter your work address:</label><div class="input"><img src="{{ STATIC_URL }}img/factory.png" height="26" alt="Home marker" class="marker"> <input type="text" id="work-address" /> <a id="locate_work" class="btn">Locate</a></div>
 		</div>
 	
 		{{ adultform.home_location }}
