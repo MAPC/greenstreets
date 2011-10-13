@@ -1,3 +1,6 @@
 [submodule "bootstrap"]
 	path = survey/static/css/bootstrap
 	url = git://github.com/twitter/bootstrap.git
+[submodule "survey/static/js/chosen"]
+	path = survey/static/js/chosen
+	url = https://github.com/harvesthq/chosen.git

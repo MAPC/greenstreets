@@ -29,13 +29,14 @@ urlpatterns = patterns('',
     (r'^studentform/$', 'survey.views.student'),
     
     # adultform
-    (r'^workform/$', 'survey.views.adult'),
+    (r'^commuterform/$', 'survey.views.commuter'),
     
     # get data
     url(r'^town/(?P<slug>[-\w]+)/streets/$', 'survey.views.get_streets', {'regional_unit': 'town'}),
-    url(r'^town/(?P<slug>[-\w]+)/employers/$', 'survey.views.get_employers'),
+    url(r'^town/(?P<slug>[-\w]+)/employers/$', 'survey.views.get_town_employers'),
     url(r'^district/(?P<slug>[-\w]+)/schools/$', 'survey.views.get_schools'),
     url(r'^district/(?P<slug>[-\w]+)/streets/$', 'survey.views.get_streets', {'regional_unit': 'schooldistrict'}),
+    url(r'^employers/$', 'survey.views.get_employers'),
     
     # district
     (r'^(?P<district_slug>[-\w]+)/$', 'survey.views.district'),

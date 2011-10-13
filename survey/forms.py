@@ -3,13 +3,13 @@ from django.forms import ModelForm, HiddenInput, TextInput, IntegerField, CharFi
 # lazy translation
 from django.utils.translation import ugettext_lazy as _
 
-from survey.models import Studentsurvey, Child, CHILD_MODES, CHILD_GRADES, CHILD_DROPOFF, Sponsor, School, Adultsurvey
+from survey.models import Studentsurvey, Child, CHILD_MODES, CHILD_GRADES, CHILD_DROPOFF, Sponsor, School, Commutersurvey
 
 
-class AdultForm(ModelForm):
+class CommuterForm(ModelForm):
     
     class Meta:
-        model = Adultsurvey
+        model = Commutersurvey
         exclude = ('walkrideday','ip')
         widgets = {
                    'home_location': HiddenInput(),
