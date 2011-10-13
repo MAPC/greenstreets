@@ -161,14 +161,10 @@ class Adultsurvey(models.Model):
     walkrideday = models.ForeignKey('Walkrideday', blank=True, null=True)
     
     home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
-    home_street = models.CharField(max_length=50, blank=True, null=True)
-    home_cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
     
     employer = models.ForeignKey('Employer', to_field='infousa_id', blank=True, null=True)
     other_employer = models.CharField(max_length=50, blank=True, null=True)
     work_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)')
-    work_street = models.CharField(max_length=50, blank=True, null=True)
-    work_cross_st = models.CharField('Cross street', max_length=50, blank=True, null=True)
     
     distance = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
     duration = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
@@ -187,7 +183,6 @@ class Adultsurvey(models.Model):
     newsletter = models.BooleanField(default=False)
     coordinator = models.BooleanField(default=False)
     volunteer = models.BooleanField(default=False)
-    
     feedback = models.TextField(blank=True, null=True)
     
     ip = models.IPAddressField('IP Address', blank=True, null=True)
