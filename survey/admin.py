@@ -1,4 +1,6 @@
-from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Adultsurvey, Walkrideday
+from django.forms import ModelForm, TextInput
+
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Commutersurvey, Walkrideday
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -24,8 +26,17 @@ class SchoolAdmin(admin.OSMGeoAdmin):
         return obj.survey_set.count()
 
 
-class Adultsurveyadmin(admin.OSMGeoAdmin):
-    exclude = ('employer',)
+class CommutersurveyAdminForm(ModelForm):
+  class Meta:
+    model = Commutersurvey
+    widgets = {
+        'employer': TextInput(),
+    }
+
+class Commutersurveyadmin(admin.OSMGeoAdmin):
+    form = CommutersurveyAdminForm
+
+
     
 class StudentsurveyAdmin(admin.OSMGeoAdmin):
     list_display = ('pk','school')
@@ -40,5 +51,5 @@ admin.site.register(Studentsurvey, StudentsurveyAdmin)
 admin.site.register(Child, ChildAdmin)
 admin.site.register(Employer, admin.OSMGeoAdmin)
 admin.site.register(Street, admin.OSMGeoAdmin)
-admin.site.register(Adultsurvey, Adultsurveyadmin)
+admin.site.register(Commutersurvey, Commutersurveyadmin)
 admin.site.register(Walkrideday, admin.ModelAdmin)

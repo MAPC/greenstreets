@@ -142,7 +142,7 @@ class Street(models.Model):
         return self.name
 
 
-ADULT_MODES = (
+COMMUTER_MODES = (
             ('c', _('Car')),
             ('w', _('Walk')),
             ('b', _('Bike')),
@@ -152,7 +152,7 @@ ADULT_MODES = (
             )
 
  
-class Adultsurvey(models.Model):
+class Commutersurvey(models.Model):
     """
     Questions for adults about their commute work
     and Green Streets interest.
@@ -169,10 +169,10 @@ class Adultsurvey(models.Model):
     distance = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
     duration = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
     
-    to_work_today = models.CharField(max_length=2, blank=True, null=True, choices=ADULT_MODES)
-    from_work_today = models.CharField(max_length=2, blank=True, null=True, choices=ADULT_MODES)  
-    to_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=ADULT_MODES)
-    from_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=ADULT_MODES) 
+    to_work_today = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)
+    from_work_today = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)  
+    to_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)
+    from_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES) 
     
     weight = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     
@@ -193,8 +193,8 @@ class Adultsurvey(models.Model):
         return u'%s' % (self.id)   
     
     class Meta:
-        verbose_name = 'Adult Survey'
-        verbose_name_plural = 'Adult Surveys' 
+        verbose_name = 'Commuter Survey'
+        verbose_name_plural = 'Commuter Surveys' 
 
 
 class Studentsurvey(models.Model):

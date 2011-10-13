@@ -380,7 +380,7 @@ $(document).ready(function() {
 	}
 
 	// form validation
-	$("#adultform").submit(function() {
+	$("#commuterform").submit(function() {
 		
 		// check for valid email
 		var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
@@ -427,20 +427,20 @@ $(document).ready(function() {
 
 <p>By providing information about your commute you can calculate the impact your had today. The blue hightlighted section allows you to calculate the CO<sub>2</sub> emissions you saved compared to a car-ride, if you chose not drive to work, today and to see your burned calories if you commuted by walking, biking or another active mode.</p>
 
-<form id="adultform" action="." method="POST">
+<form id="commuterform" action="." method="POST">
 	
 	{% csrf_token %}
 
 	<fieldset>
     	<h3>1. Please tell us about yourself:</h3>
     	<div class="clearfix">
-			<label>Your name (optional)</label><div class="input">{{ adultform.name }}</div>
+			<label>Your name (optional)</label><div class="input">{{ commuterform.name }}</div>
 		</div>
 		<div class="clearfix">
-			<label>Your email (<span class="required_field">required</span>)</label><div class="input">{{ adultform.email }}<span class="help-block">We respect your privacy and won't share any information.</span></div>
+			<label>Your email (<span class="required_field">required</span>)</label><div class="input">{{ commuterform.email }}<span class="help-block">We respect your privacy and won't share any information.</span></div>
 		</div>
 		<div class="clearfix">
-			<div class="input">{{ adultform.newsletter }} <span>I would like to subscribe to your monthly newsletter.</span></div> 
+			<div class="input">{{ commuterform.newsletter }} <span>I would like to subscribe to your monthly newsletter.</span></div> 
 		</div>
     </fieldset>
 
@@ -462,21 +462,21 @@ $(document).ready(function() {
 			<label>Enter your work address:</label><div class="input"><img src="{{ STATIC_URL }}img/factory.png" height="26" alt="Home marker" class="marker"> <input type="text" id="work-address" /> <a id="locate_work" class="btn">Locate</a></div>
 		</div>
 	
-		{{ adultform.home_location }}
-		{{ adultform.work_location }}
-		{{ adultform.distance }}
-		{{ adultform.duration }}
+		{{ commuterform.home_location }}
+		{{ commuterform.work_location }}
+		{{ commuterform.distance }}
+		{{ commuterform.duration }}
 		
 		<h4>How did you commute (<span class="required_field">required</span>)?</h3>
 
 		<div class="clearfix">
-			<label>To work today:</label> <div class="input">{{ adultform.to_work_today }}</div>
-			<label>From work today:</label><div class="input">{{ adultform.from_work_today }}</div>
+			<label>To work today:</label> <div class="input">{{ commuterform.to_work_today }}</div>
+			<label>From work today:</label><div class="input">{{ commuterform.from_work_today }}</div>
 		</div>
 
 		<div class="clearfix">
-			<label>To work yesterday:</label> <div class="input">{{ adultform.to_work_yesterday }}</div>
-			<label>From work yesterday:</label><div class="input">{{ adultform.from_work_yesterday }}</div>
+			<label>To work yesterday:</label> <div class="input">{{ commuterform.to_work_yesterday }}</div>
+			<label>From work yesterday:</label><div class="input">{{ commuterform.from_work_yesterday }}</div>
 		</div>
 
 		<div class="alert-message block-message info">
@@ -490,8 +490,8 @@ $(document).ready(function() {
 			</div>
 			
 			<div class="clearfix">
-				{{ adultform.weight.errors }}
-				<label>Your weight [lbs]:</label> <div class="input">{{ adultform.weight }}</div>
+				{{ commuterform.weight.errors }}
+				<label>Your weight [lbs]:</label> <div class="input">{{ commuterform.weight }}</div>
 				<label>Your burned calories:</label> <div id="burned_calories" class="input">Enter your weight and click button below to calculate</div>
 				<button id="button_calories" class="btn impact">Calculate Calories</button>
 				<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a></span>
@@ -515,7 +515,7 @@ $(document).ready(function() {
 				</div>
 			</div>
 			<div class="clearfix">
-				<label>other: </label><div class="input">{{ adultform.other_employer }}</div>
+				<label>other: </label><div class="input">{{ commuterform.other_employer }}</div>
 			</div>
 			<p>Please drag and drop the blue work-place-marker to the correct location if you entered an <em>other</em> employer.</p>
 			<div class="clearfix">
@@ -530,18 +530,18 @@ $(document).ready(function() {
 		<h3>4. Get involved!</h3>
 
 		<div class="clearfix">
-			<label>Green Streets sponsors offer freebies, discounts, and raffles. Will you take advantage at any of our sponsoring businesses?</label><div class="input">{{ adultform.sponsor }}</div>
+			<label>Green Streets sponsors offer freebies, discounts, and raffles. Will you take advantage at any of our sponsoring businesses?</label><div class="input">{{ commuterform.sponsor }}</div>
 		</div>
 
 		<div class="clearfix">
-			<div class="input">{{ adultform.coordinator }} I would like to become a Walk/Ride Day coordinator for my company, school or other organization.</div>
+			<div class="input">{{ commuterform.coordinator }} I would like to become a Walk/Ride Day coordinator for my company, school or other organization.</div>
 		</div>
 		<div class="clearfix">
-			<div class="input">{{ adultform.volunteer }} I would like to help Green Streets by volunteering in another capacity.</div>
+			<div class="input">{{ commuterform.volunteer }} I would like to help Green Streets by volunteering in another capacity.</div>
 		</div>
 
 		<div class="clearfix">
-			<label>Additional thoughts or feedback:</label><div class="input">{{ adultform.feedback }}</div>
+			<label>Additional thoughts or feedback:</label><div class="input">{{ commuterform.feedback }}</div>
 		</div>
 
 	</fieldset>	

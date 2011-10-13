@@ -7,8 +7,8 @@ from django.contrib.gis.geos import fromstr
 
 from django.forms.models import inlineformset_factory
 
-from survey.models import School, Studentsurvey, Child, Schooldistrict, Street, Town, Adultsurvey, Employer, Walkrideday
-from survey.forms import StudentForm, ChildForm, AdultForm
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Street, Town, Commutersurvey, Employer, Walkrideday
+from survey.forms import StudentForm, ChildForm, CommuterForm
 
 
 def process_request(request):
@@ -155,26 +155,26 @@ def student(request):
 
         return render_to_response('survey/studentform.html', locals(), context_instance=RequestContext(request))
 
-def adult(request):
+def commuter(request):
     """
     Renders Commuterform or saves it in case of POST request. 
     """
 
     request = process_request(request)
 
-    adultsurvey = Adultsurvey()
+    commutersurvey = Commutersurvey()
 
     if request.method == 'POST':
-        adultform = AdultForm(request.POST, instance=adultsurvey)
-        adultsurvey.ip = request.META['REMOTE_ADDR']
-        adultsurvey.walkrideday = Walkrideday.objects.filter(active=True).order_by('-date')[0]
-        if adultform.is_valid():
-            adultform.save()
+        commuterform = CommuterForm(request.POST, instance=commutersurvey)
+        commutersurvey.ip = request.META['REMOTE_ADDR']
+        commutersurvey.walkrideday = Walkrideday.objects.filter(active=True).order_by('-date')[0]
+        if commuterform.is_valid():
+            commuterform.save()
             return render_to_response('survey/thanks.html', locals(), context_instance=RequestContext(request))
         else:
             towns = Town.objects.filter(survey_active=True)
-            return render_to_response('survey/adultform.html', locals(), context_instance=RequestContext(request))
+            return render_to_response('survey/commuterform.html', locals(), context_instance=RequestContext(request))
     else:
-        adultform = AdultForm(instance=adultsurvey)
+        commuterform = CommuterForm(instance=commutersurvey)
         towns = Town.objects.filter(survey_active=True)
-        return render_to_response('survey/adultform.html', locals(), context_instance=RequestContext(request))
+        return render_to_response('survey/commuterform.html', locals(), context_instance=RequestContext(request))
