@@ -57,4 +57,13 @@ span.required_field {
 	float: right;
 }
 
+.chzn-select {
+	width: 220px;
+}
+
+.chzn-container .chzn-results li {
+    line-height: 120%;
+    padding: 4px 7px 4px;
+}
+
 

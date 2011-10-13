@@ -16,13 +16,11 @@
 	<meta name="geo.region" content="US-MA">
 	<meta name="ICBM" content="42.34;-71.08">
 	
+	{% block style %}
 	<link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap/bootstrap.min.css">
 	<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
-	
-	<style type="text/css">
-	{% block style %}{% endblock %}
-	</style>
-	
+	{% endblock %}
+		
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript"></script>
 	
 	{% block javascript %}{% endblock %}
