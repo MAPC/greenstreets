@@ -419,13 +419,9 @@ $(document).ready(function() {
 
 {% block body %}
 
-<a href="http://www.gogreenstreets.org/" target="_blank" title="Green Streets Initiative"><img id="logo" src="{{ STATIC_URL }}img/logo-greenstreets.png" height="218" width="124" alt="Green Streets Initiative"></a>
-
 <h2>Check-in your commute to work!</h2>
 
-<p>A check-in helps us to see the impact of our initiative and involves only 2 required and 2 optional quick steps.</p>
-
-<p>By providing information about your commute you can calculate the impact your had today. The blue hightlighted section allows you to calculate the CO<sub>2</sub> emissions you saved compared to a car-ride, if you chose not drive to work, today and to see your burned calories if you commuted by walking, biking or another active mode.</p>
+<p>A check-in helps us to monitor the impact of our initiative and involves only 2 required and 2 optional quick steps.</p>
 
 <form id="commuterform" action="." method="POST">
 	
@@ -440,7 +436,7 @@ $(document).ready(function() {
 			<label>Your email (<span class="required_field">required</span>)</label><div class="input">{{ commuterform.email }}<span class="help-block">We respect your privacy and won't share any information.</span></div>
 		</div>
 		<div class="clearfix">
-			<div class="input">{{ commuterform.newsletter }} <span>I would like to subscribe to your monthly newsletter.</span></div> 
+			<label>I would like to subscribe to your monthly newsletter.</label><div class="input">{{ commuterform.newsletter }}</div> 
 		</div>
     </fieldset>
 
@@ -448,12 +444,7 @@ $(document).ready(function() {
 		
 		<h3>2. Please tell us about your commute (<span class="required_field">required</span>):</h3>
 
-		<p>Please drag and drop the yellow home-marker to the location where your commute started and the blue work-place-marker to the location where it ended today.</p>
-		
-		<div id="map_canvas">map div</div>
-		<p id="map_legend" class="small"><img src="{{ STATIC_URL }}img/home.png" height="20" alt="Home marker" > ... {% blocktrans %}your home{% endblocktrans %} <img src="{{ STATIC_URL }}img/factory.png" height="20" alt="Home marker" > ... your work place</p>
-		
-		<p>Or use the address fields below to locate both markers in the map:</p>
+		<p>Please tell us where your commute started and ended today. Please use the address fields or drag and drop the icons.</p>
 
 		<div class="clearfix">
 			<label>Enter your home address:</label><div class="input"><img src="{{ STATIC_URL }}img/home.png" height="26" alt="Home marker" class="marker"> <input type="text" id="home-address" /> <a id="locate_home" class="btn">Locate</a></div>
@@ -461,32 +452,38 @@ $(document).ready(function() {
 		<div class="clearfix">
 			<label>Enter your work address:</label><div class="input"><img src="{{ STATIC_URL }}img/factory.png" height="26" alt="Home marker" class="marker"> <input type="text" id="work-address" /> <a id="locate_work" class="btn">Locate</a></div>
 		</div>
+
+		<div id="map_canvas">map div</div>
+		<p id="map_legend" class="small"><img src="{{ STATIC_URL }}img/home.png" height="20" alt="Home marker" > {% blocktrans %}for home{% endblocktrans %}, and <img src="{{ STATIC_URL }}img/factory.png" height="20" alt="Home marker" > for workplace</p>
 	
 		{{ commuterform.home_location }}
 		{{ commuterform.work_location }}
 		{{ commuterform.distance }}
 		{{ commuterform.duration }}
 		
-		<h4>How did you commute (<span class="required_field">required</span>)?</h3>
+		<h4>How did you commute today, on Walk/Ride Day (<span class="required_field">required</span>)?</h3>
 
 		<div class="clearfix">
 			<label>To work today:</label> <div class="input">{{ commuterform.to_work_today }}</div>
-			<label>From work today:</label><div class="input">{{ commuterform.from_work_today }}</div>
+			<label>From work today:</label><div class="input">{{ commuterform.from_work_today }}<span class="help-block">Please refer to the longest leg of your commute.</span></div>
+
 		</div>
 
+		<h4>How do you normally commute?</h3>
+
 		<div class="clearfix">
-			<label>To work yesterday:</label> <div class="input">{{ commuterform.to_work_yesterday }}</div>
-			<label>From work yesterday:</label><div class="input">{{ commuterform.from_work_yesterday }}</div>
+			<label>To work on a usual day:</label> <div class="input">{{ commuterform.to_work_yesterday }}</div>
+			<label>From work on a usual day:</label><div class="input">{{ commuterform.from_work_yesterday }}<span class="help-block">Please refer to the longest leg of your commute.</span></div>
 		</div>
 
 		<div class="alert-message block-message info">
 
-			<h4>See your impact you had today:</h4>
+			<h4>See your impact you had today:</h4><span class="help-block"></span>
 			
 			<div class="clearfix">
 				<label>Saved CO<sub>2</sub> emissions:</label> <div class="input" id="saved_co2">Click button below to calculate</div>
 				<button id="button_co2" class="btn impact">Calculate CO2</button>
-				<span class="help-block impact">Per EPA standards and assumptions.</span>
+				<span class="help-block impact">Per EPA standards and assumptions, compared to commuting by car, alone.</span>
 			</div>
 			
 			<div class="clearfix">
@@ -494,7 +491,7 @@ $(document).ready(function() {
 				<label>Your weight [lbs]:</label> <div class="input">{{ commuterform.weight }}</div>
 				<label>Your burned calories:</label> <div id="burned_calories" class="input">Enter your weight and click button below to calculate</div>
 				<button id="button_calories" class="btn impact">Calculate Calories</button>
-				<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a></span>
+				<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car or transit.</span>
 			</div>
 
 		</div>
@@ -507,19 +504,15 @@ $(document).ready(function() {
 		
 		<div id="employer_fields">
 			<div class="clearfix">
-				<label>Please select your place of work:</label>
+				<label>Please select your workplace:</label>
 				<div class="input">
 					<select class="chzn-select" id="id_employer" name="employer" tabindex="2">
-						<option selected="selected" value="">Please move the work-place marker first.</option>
+						<option selected="selected" value="">Please specify your work-location first.</option>
 					</select>
 				</div>
 			</div>
 			<div class="clearfix">
 				<label>other: </label><div class="input">{{ commuterform.other_employer }}</div>
-			</div>
-			<p>Please drag and drop the blue work-place-marker to the correct location if you entered an <em>other</em> employer.</p>
-			<div class="clearfix">
-				
 			</div>
 		</div>
 
@@ -530,18 +523,22 @@ $(document).ready(function() {
 		<h3>4. Get involved!</h3>
 
 		<div class="clearfix">
-			<label>Green Streets sponsors offer freebies, discounts, and raffles. Will you take advantage at any of our sponsoring businesses?</label><div class="input">{{ commuterform.sponsor }}</div>
+			<label>My workplace, school or other organization would like to get involved and promote Walk/Ride Days, and I will be the on-site contact person.</label><div class="input">{{ commuterform.coordinator }}</div>
+		</div>
+		<div class="clearfix">
+			<label>I would like to help Green Streets by volunteering in another capacity.</label><div class="input">{{ commuterform.volunteer }}</div>
 		</div>
 
 		<div class="clearfix">
-			<div class="input">{{ commuterform.coordinator }} I would like to become a Walk/Ride Day coordinator for my company, school or other organization.</div>
-		</div>
-		<div class="clearfix">
-			<div class="input">{{ commuterform.volunteer }} I would like to help Green Streets by volunteering in another capacity.</div>
+			<label>My workplace would like to sponsor Walk/Ride Days at a local school or event.</label><div class="input">{{ commuterform.potential_sponsor }}</div>
 		</div>
 
 		<div class="clearfix">
-			<label>Additional thoughts or feedback:</label><div class="input">{{ commuterform.feedback }}</div>
+			<label>I will take advantage of incentives offered by Walk/Ride Day Retail Partners to participants.</label><div class="input">{{ commuterform.sponsor }}</div>
+		</div>
+		
+		<div class="clearfix">
+			<label>Additional thoughts or feedback in general, about Walk/Ride Days or your green commute:</label><div class="input">{{ commuterform.feedback }}</div>
 		</div>
 
 	</fieldset>	

@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
 from django.contrib.gis.geos import fromstr
+
+from datetime import date, timedelta
 
 from django.forms.models import inlineformset_factory
 
@@ -13,8 +15,7 @@ from survey.forms import StudentForm, ChildForm, CommuterForm
 
 def process_request(request):
     """ 
-    Sets 'REMOTE_ADDR' based on 'HTTP_X_FORWARDED_FOR', if the latter is
-    set.
+    Sets 'REMOTE_ADDR' based on 'HTTP_X_FORWARDED_FOR', if the latter is set.
     Based on http://djangosnippets.org/snippets/1706/
     """
     if 'HTTP_X_FORWARDED_FOR' in request.META:
@@ -22,8 +23,28 @@ def process_request(request):
         request.META['REMOTE_ADDR'] = ip
     return request
 
+def get_active_wrday():
+    """
+    Returns the Walk/Ride day object if today is within a valid range;
+    Monday - Walk/Ride Day - Wednesday
+    FIXME: end_date = + 4 days; form is now open for feedback
+    """
+    today = date.today()
+    start_date = today - timedelta(days=5)
+    end_date = today + timedelta(days=7)
+    
+    wrdays = Walkrideday.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+
+    return wrdays[0] if wrdays.exists() else False
+
 
 def index(request):
+
+    wrday = get_active_wrday()
+
+    # find next Walk/Ride Day
+    if wrday == False:
+        wrday_next = Walkrideday.objects.filter(date__gt=date.today()).order_by('date')[0]
     
     return render_to_response('survey/index.html', locals(), context_instance=RequestContext(request))
     
@@ -160,6 +181,12 @@ def commuter(request):
     Renders Commuterform or saves it in case of POST request. 
     """
 
+    wrday = get_active_wrday()
+
+    # no Walk/Ride Day
+    if wrday == False:
+        return redirect('/')
+
     request = process_request(request)
 
     commutersurvey = Commutersurvey()
@@ -167,7 +194,7 @@ def commuter(request):
     if request.method == 'POST':
         commuterform = CommuterForm(request.POST, instance=commutersurvey)
         commutersurvey.ip = request.META['REMOTE_ADDR']
-        commutersurvey.walkrideday = Walkrideday.objects.filter(active=True).order_by('-date')[0]
+        commutersurvey.walkrideday = wrday
         if commuterform.is_valid():
             commuterform.save()
             return render_to_response('survey/thanks.html', locals(), context_instance=RequestContext(request))
