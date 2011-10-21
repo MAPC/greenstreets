@@ -182,6 +182,7 @@ class Commutersurvey(models.Model):
     email = models.EmailField(blank=True, null=True)
     newsletter = models.BooleanField(default=False)
     coordinator = models.BooleanField(default=False)
+    potential_sponsor = models.BooleanField(default=False)
     volunteer = models.BooleanField(default=False)
     feedback = models.TextField(blank=True, null=True)
     

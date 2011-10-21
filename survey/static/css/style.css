@@ -1,5 +1,8 @@
+.topbar h3 a {
+	padding: 18px 20px 22px;
+}
 .main {
-	margin-top: 60px;
+	margin-top: 80px;
 }
 footer {
 	text-align: center;
@@ -53,8 +56,16 @@ span.required_field {
     margin-right: 4px;
 }
 
+input[type="checkbox"] {
+	margin-top: 9px;
+}
+
 #logo {
 	float: right;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	height: 56px;
+	width: 114px;
 }
 
 .chzn-select {
