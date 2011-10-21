@@ -54,11 +54,14 @@ class StudentsurveyAdmin(admin.OSMGeoAdmin):
 class ChildAdmin(admin.ModelAdmin):
     list_display = ('pk','survey')
 
+class EmployerAdmin(admin.OSMGeoAdmin):
+    search_fields = ['name', 'infousa_id']
+
 admin.site.register(Schooldistrict, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
 admin.site.register(Studentsurvey, StudentsurveyAdmin)
 admin.site.register(Child, ChildAdmin)
-admin.site.register(Employer, admin.OSMGeoAdmin)
+admin.site.register(Employer, EmployerAdmin)
 admin.site.register(Street, admin.OSMGeoAdmin)
 admin.site.register(Commutersurvey, CommutersurveyAdmin)
 admin.site.register(Walkrideday, admin.ModelAdmin)
