@@ -1,6 +1,6 @@
 from django.forms import ModelForm, TextInput
 
-from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Commutersurvey, Walkrideday
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Commutersurvey, Walkrideday, Sponsor
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -33,10 +33,19 @@ class CommutersurveyAdminForm(ModelForm):
         'employer': TextInput(),
     }
 
-class Commutersurveyadmin(admin.OSMGeoAdmin):
+class CommutersurveyAdmin(admin.OSMGeoAdmin):
     form = CommutersurveyAdminForm
 
 
+class SponsorAdminForm(ModelForm):
+    class Meta:
+        model = Sponsor
+        widgets = {
+            'employer': TextInput(),
+        }
+
+class SponsorAdmin(admin.ModelAdmin):
+    form = CommutersurveyAdminForm
     
 class StudentsurveyAdmin(admin.OSMGeoAdmin):
     list_display = ('pk','school')
@@ -51,5 +60,6 @@ admin.site.register(Studentsurvey, StudentsurveyAdmin)
 admin.site.register(Child, ChildAdmin)
 admin.site.register(Employer, admin.OSMGeoAdmin)
 admin.site.register(Street, admin.OSMGeoAdmin)
-admin.site.register(Commutersurvey, Commutersurveyadmin)
+admin.site.register(Commutersurvey, CommutersurveyAdmin)
 admin.site.register(Walkrideday, admin.ModelAdmin)
+admin.site.register(Sponsor, SponsorAdmin)
