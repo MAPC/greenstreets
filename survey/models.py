@@ -123,6 +123,9 @@ class Sponsor(models.Model):
     
     active = models.BooleanField(default=True)
     walkrideday = models.ManyToManyField('Walkrideday')
+
+    def __unicode__(self):
+        return self.employer.name
     
 class Street(models.Model):
     """
