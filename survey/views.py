@@ -4,6 +4,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
 from django.contrib.gis.geos import fromstr
+from django.conf import settings
 
 from datetime import date, timedelta
 
@@ -26,11 +27,18 @@ def process_request(request):
 def get_active_wrday():
     """
     Returns the Walk/Ride day object if today is within a valid range;
-    Monday - Walk/Ride Day - Wednesday
+    time window is 10 days from Monday -> Walk/Ride Day -> Wednesday.
     """
+
+    # expand time window for development
+    if settings.DEBUG == True:
+        timewindow = 5, 365
+    else:
+        timewindow = 5, 4
+
     today = date.today()
-    start_date = today - timedelta(days=5)
-    end_date = today + timedelta(days=4)
+    start_date = today - timedelta(days=timewindow[0])
+    end_date = today + timedelta(days=timewindow[1])
     
     wrdays = Walkrideday.objects.filter(date__range=(start_date, end_date)).order_by('-date')
 
