@@ -384,7 +384,7 @@ $(document).ready(function() {
 		
 		// check for valid email
 		var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-		if (emailReg.test($("#id_email").val()) === false) {
+		if (emailReg.test($("#id_email").val()) === false || $("#id_email").val() === "") {
 			$("#form_error_msg").html("<p>Please provide a valid email address.</p>");
 			$("#form_error_modal").modal("show");
 			return false;
