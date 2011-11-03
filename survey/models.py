@@ -149,7 +149,8 @@ COMMUTER_MODES = (
             ('b', _('Bike')),
             ('cp', _('Carpool')),
             ('t', _('Transit (bus, subway, train, etc.)')),
-            ('o', _('Other (skateboard, scooter, inline skates, etc.)'))
+            ('o', _('Other (skateboard, scooter, inline skates, etc.)')),
+            ('tc', _('Telecommuting')),
             )
 
  
@@ -181,11 +182,14 @@ class Commutersurvey(models.Model):
     
     name = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=50, blank=True, null=True)
     newsletter = models.BooleanField(default=False)
     coordinator = models.BooleanField(default=False)
     potential_sponsor = models.BooleanField(default=False)
     volunteer = models.BooleanField(default=False)
     feedback = models.TextField(blank=True, null=True)
+
+    other_greentravel = models.BooleanField(default=False)
     
     ip = models.IPAddressField('IP Address', blank=True, null=True)
     

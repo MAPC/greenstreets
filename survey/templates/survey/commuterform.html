@@ -430,7 +430,10 @@ $(document).ready(function() {
 	<fieldset>
     	<h3>1. Please tell us about yourself:</h3>
     	<div class="clearfix">
-			<label>Your name (optional)</label><div class="input">{{ commuterform.name }}</div>
+			<label>Your name</label><div class="input">{{ commuterform.name }}</div>
+		</div>
+		<div class="clearfix">
+			<label>Your phone number</label><div class="input">{{ commuterform.phone }}</div>
 		</div>
 		<div class="clearfix">
 			<label>Your email (<span class="required_field">required</span>)</label><div class="input">{{ commuterform.email }}<span class="help-block">We respect your privacy and won't share any information.</span></div>
@@ -483,7 +486,7 @@ $(document).ready(function() {
 			<div class="clearfix">
 				<label>Saved CO<sub>2</sub> emissions:</label> <div class="input" id="saved_co2">Click button below to calculate</div>
 				<button id="button_co2" class="btn impact">Calculate CO2</button>
-				<span class="help-block impact">Per EPA standards and assumptions, compared to commuting by car, alone.</span>
+				<span class="help-block impact">Per EPA standards and assumptions, compared to commuting by car alone.</span>
 			</div>
 			
 			<div class="clearfix">
@@ -491,9 +494,15 @@ $(document).ready(function() {
 				<label>Your weight [lbs]:</label> <div class="input">{{ commuterform.weight }}</div>
 				<label>Your burned calories:</label> <div id="burned_calories" class="input">Enter your weight and click button below to calculate</div>
 				<button id="button_calories" class="btn impact">Calculate Calories</button>
-				<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car or transit.</span>
+				<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car alone or transit.</span>
 			</div>
 
+		</div>
+
+		<h4>Record more green travels today?</h4>
+
+		<div class="clearfix">
+			<label>I also used green transportation for shopping, errands, or social visits today.</label><div class="input">{{ commuterform.other_greentravel }}</div>
 		</div>
 		
 	</fieldset>
@@ -504,10 +513,10 @@ $(document).ready(function() {
 		
 		<div id="employer_fields">
 			<div class="clearfix">
-				<label>Please select your workplace:</label>
+				<label>Please select your employer:</label>
 				<div class="input">
 					<select class="chzn-select" id="id_employer" name="employer" tabindex="2">
-						<option selected="selected" value="">Please specify your work-location first.</option>
+						<option selected="selected" value="">Please specify your work location in Question 1 first.</option>
 					</select>
 				</div>
 			</div>
