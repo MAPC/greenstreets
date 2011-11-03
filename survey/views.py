@@ -27,11 +27,10 @@ def get_active_wrday():
     """
     Returns the Walk/Ride day object if today is within a valid range;
     Monday - Walk/Ride Day - Wednesday
-    FIXME: end_date = + 4 days; form is now open for feedback
     """
     today = date.today()
     start_date = today - timedelta(days=5)
-    end_date = today + timedelta(days=7)
+    end_date = today + timedelta(days=4)
     
     wrdays = Walkrideday.objects.filter(date__range=(start_date, end_date)).order_by('-date')
 
@@ -74,7 +73,7 @@ def get_employer_list(employers):
 
 def get_employers(request):
     """
-    Accepts lat, lon and radius parameters and returns a JSON object of found employers
+    Accepts lat, lon and radius parameters and returns a JSON object of max. 500 found employers.
     """
 
     location = fromstr('POINT(%s %s)' % (request.GET['lng'], request.GET['lat']), srid=4326)
