@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.views.decorators.cache import never_cache
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
 from django.contrib.gis.geos import fromstr
@@ -146,6 +147,8 @@ def get_streets(request, slug, regional_unit):
     
     return HttpResponse(simplejson.dumps(street_list), mimetype='application/json')
 
+
+@never_cache
 def student(request):
     """
     Renders Studentform or saves it and related Childforms in case of POST request. 
@@ -183,6 +186,8 @@ def student(request):
 
         return render_to_response('survey/studentform.html', locals(), context_instance=RequestContext(request))
 
+
+@never_cache
 def commuter(request):
     """
     Renders Commuterform or saves it in case of POST request. 
