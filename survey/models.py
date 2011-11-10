@@ -17,6 +17,8 @@ except ImportError:
 class Walkrideday(models.Model):
     """ Selected dates when Walk/Ride days happened"""
     date = models.DateField(auto_now=False, auto_now_add=False)
+    start_date = models.DateField(auto_now=False, auto_now_add=False, blank=True, null=True, help_text='Requires also an end date, if set.')
+    end_date = models.DateField(auto_now=False, auto_now_add=False, blank=True, null=True, help_text='Requires also an start date, if set.')
     active = models.BooleanField(default=False)
     note = models.TextField(blank=True, null=True)
     

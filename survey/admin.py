@@ -57,6 +57,9 @@ class ChildAdmin(admin.ModelAdmin):
 class EmployerAdmin(admin.OSMGeoAdmin):
     search_fields = ['name', 'infousa_id']
 
+class WalkridedayAdmin(admin.ModelAdmin):
+    list_display = ['date', 'start_date', 'end_date']
+
 admin.site.register(Schooldistrict, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
 admin.site.register(Studentsurvey, StudentsurveyAdmin)
@@ -64,5 +67,5 @@ admin.site.register(Child, ChildAdmin)
 admin.site.register(Employer, EmployerAdmin)
 admin.site.register(Street, admin.OSMGeoAdmin)
 admin.site.register(Commutersurvey, CommutersurveyAdmin)
-admin.site.register(Walkrideday, admin.ModelAdmin)
+admin.site.register(Walkrideday, WalkridedayAdmin)
 admin.site.register(Sponsor, SponsorAdmin)

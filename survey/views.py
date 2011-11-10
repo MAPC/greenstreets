@@ -3,6 +3,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.views.decorators.cache import never_cache
 from django.http import HttpResponse, HttpResponseRedirect
+from django.db.models import Q
 from django.utils import simplejson
 from django.contrib.gis.geos import fromstr
 from django.conf import settings
@@ -40,8 +41,16 @@ def get_active_wrday():
     today = date.today()
     start_date = today - timedelta(days=timewindow[0])
     end_date = today + timedelta(days=timewindow[1])
-    
-    wrdays = Walkrideday.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+
+    # check if today is within a custom W/R day time window
+    wrdays = Walkrideday.objects.filter(
+        Q(end_date__gte=today),
+        Q(start_date__lte=today)
+    ).order_by('date')
+
+    # if not, check if today is within a default W/R day time window
+    if wrdays.exists() == False:
+        wrdays = Walkrideday.objects.filter(date__range=(start_date, end_date)).order_by('date')
 
     return wrdays[0] if wrdays.exists() else False
 
@@ -217,3 +226,5 @@ def commuter(request):
         commuterform = CommuterForm(instance=commutersurvey)
         towns = Town.objects.filter(survey_active=True)
         return render_to_response('survey/commuterform.html', locals(), context_instance=RequestContext(request))
+
+
