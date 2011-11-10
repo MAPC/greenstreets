@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>{% block title %}{% endblock %}Walk/Ride Day Pledge and Check-In</title>
+    <title>Walk/Ride Day Pledge and Check-In | {% block title %}{% endblock %}</title>
 	<meta name="description" content="Green Streets Walk Ride Day Survey">
 	<meta name="keywords" content="Boston, Metro, Planning, Education, Survey, Pedestrian, Walking, Green Streets, Walk/Ride Day">
 	<meta name="author" content="MAPC">
@@ -17,13 +17,9 @@
 	<meta name="ICBM" content="42.34;-71.08">
 	
 	{% block style %}
-	<link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap/bootstrap.min.css">
+	<link rel="stylesheet" href="{{ STATIC_URL }}libs/bootstrap/css/bootstrap.css">
 	<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
 	{% endblock %}
-		
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript"></script>
-	
-	{% block javascript %}{% endblock %}
 	
 	<script type="text/javascript">
 
@@ -42,29 +38,40 @@
 </head>
 <body>
 
-	<div class="topbar">
-		<div class="fill">
+	<div class="navbar navbar-fixed-top">
+		<div class="masthead">
 			<div class="container">
-				<h3><a href="/">Walk/Ride Day Pledge and Check-In</a></h3>
-				<div>
-				<a href="http://www.gogreenstreets.org/" target="_blank" title="Green Streets Initiative"><img id="logo" src="{{ STATIC_URL }}img/logo-greenstreets.png" alt="Green Streets Initiative"></a>
-			</div>
+				<a href="http://www.gogreenstreets.org/" target="_blank" title="Green Streets Initiative"><img src="{{ STATIC_URL }}img/header-banner.jpg" width="1000" height="100" alt="Green Streets Initiative"></a>
 			</div>
 			
 		</div>
 	</div>
+
 	<div class="main container {{ LANGUAGE_CODE }}">
+
+		<header class="page-header">
+			<div class="row">
+			  <div class="span12">
+			  	{% block pageheader %}{% endblock pageheader %}
+			  </div>
+			</div>
+		</header>
 	
-	{% block body %}{% endblock %}
+		{% block body %}{% endblock %}
+
+		<footer class="footer">
+			<p>
+				{% trans "Questions? Please contact" %} <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
+				&copy; <a href="http://www.mapc.org" title="Metropolitan Area Planning Council">MAPC</a> 2012
+			</p>	
+		</footer>
 	
 	</div>
-	
-	<footer>
-		<p>
-			{% trans "Questions? Please contact" %} <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
-			&copy; <a href="http://www.mapc.org" title="Metropolitan Area Planning Council">MAPC</a> 2011
-		</p>	
-	</footer>
+
+	<!-- JavaScripts -->
+	<script src="{{ STATIC_URL }}libs/jquery-1.7.1.min.js" type="text/javascript"></script>
+
+	{% block javascript %}{% endblock %}
 	
 </body>
 </html>

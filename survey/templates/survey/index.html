@@ -1,37 +1,28 @@
 {% extends "base.html" %}
 {% load i18n %}
 
+{% block pageheader %}
+	<h1 class="front-page">Walk/Ride Day Pledge and Check-In</h1>
+{% endblock pageheader %}
+
 {% block body %}
-<div class="row">
-	
-	<div class="span16">
 
-		<p>Completing this short survey for each month's Walk/Ride Day helps us, you, and others, see the impact of Walk/Ride Days.</p>
-
-		<p><strong>After filling it out, you will be entered into a raffle!</strong></p>
-
-		<p>Thank you for checking in and for traveling sustainably!</p>
-
-		<p>The Green Streets Team<br />
-			<a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
-			<a href="http://www.gogreenstreets.org">www.GoGreenStreets.org</a>
-		</p>
-
+<section class="front-page">
+	<div class="row">
+	  <div class="span12">
+	    <p class="lead">Completing this short survey for each month's Walk/Ride Day helps us, you, and others, see the impact of Walk/Ride Days.</p>
+	    <p class="lead"><strong>After filling it out, you will be entered into a raffle!</strong></p>
+	    <p class="lead"><a href="{% if not wrday %}#{% else %}/commuterform/{% endif %}" class="btn primary large {% if not wrday %}disabled{% endif %}" tabindex="3">Check-in my own commute!</a>
+		<a href="{% if not wrday %}#{% else %}/studentform/{% endif %}" class="btn primary large {% if not wrday %}disabled{% endif %}" tabindex="5">Check-in my child's commute!</a></p>
+			 {% if not wrday %}<p class="lead">Check-Ins are currently disabled. Please visit us again for the next Walk/Ride Day on <strong>{{ wrday_next.date }}</strong>.</p>
+		<p>In the meantime, if you haven't already, please <a href="http://www.surveymonkey.com/s.aspx?sm=JNNjmhamGdFGqFw_2bStaZbw_3d_3d">sign up here</a> to receive our monthly reminder.</p>{% endif %}
+			<p class="lead">Thank you for checking in and for traveling sustainably!</p>
+			<p class="lead">The Green Streets Team<br />
+				<a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
+				<a href="http://www.gogreenstreets.org">www.GoGreenStreets.org</a>
+			</p>
+	  </div>
 	</div>
-	
-	<div class="span6 offset2 center">
-		
-		<a href="{% if not wrday %}#{% else %}/commuterform/{% endif %}" class="btn primary large {% if not wrday %}disabled{% endif %}" tabindex="3">Check-in my own commute!</a>
-		
-	</div>
-	
-	<div class="span6 center">
-		
-		<a href="{% if not wrday %}#{% else %}/studentform/{% endif %}" class="btn primary large {% if not wrday %}disabled{% endif %}" tabindex="5">Check-in my child's commute!</a>
-		
-	</div>
-	
-	{% if not wrday %}<div class="span12 offset2 center"><p>Check-Ins are currently disabled. Please visit us again for the next Walk/Ride Day on <strong>{{ wrday_next.date }}</strong>.</p></div>{% endif %}
-	
-</div>
+</section>
+
 {% endblock %}
