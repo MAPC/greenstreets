@@ -31,7 +31,10 @@
 		
 	</div>
 	
-	{% if not wrday %}<div class="span12 offset2 center"><p>Check-Ins are currently disabled. Please visit us again for the next Walk/Ride Day on <strong>{{ wrday_next.date }}</strong>.</p></div>{% endif %}
+	{% if not wrday %}<div class="span12 offset2 center"><p>Check-Ins are currently disabled. Please visit us again for the next Walk/Ride Day on <strong>{{ wrday_next.date }}</strong>.</p>
+	<p>In the meantime, if you haven't already, please <a href="http://www.surveymonkey.com/s.aspx?sm=JNNjmhamGdFGqFw_2bStaZbw_3d_3d">sign up here</a> to receive our monthly reminder.</p></div>
+
+	{% endif %}
 	
 </div>
 {% endblock %}
