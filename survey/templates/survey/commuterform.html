@@ -9,6 +9,8 @@
 
 {% block javascript %}
 
+<script src="{{ STATIC_URL }}libs/bootstrap/js/bootstrap.js" type="text/javascript"></script>
+
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 <script src="{{ STATIC_URL }}js/jquery.shuffle.js" type="text/javascript"></script>
 <script src="{{ STATIC_URL }}js/jquery.cookie.js" type="text/javascript"></script>
@@ -19,15 +21,6 @@
 
 $(document).ready(function() {
 
-	// check if cookies are enabled
-	$.cookie('test_cookie', 'testing', { path: '/' });
-	if ($.cookie('test_cookie') !== 'testing') {
-		alert("Please allow cookies for this site in your browser, otherwise the survey form might not work. Thank you!");
-	}
-	
-	// initiate chosen dropdown UIs	
-	$(".chzn-select").chosen();
-
 	var boston = new google.maps.LatLng(42.357778, -71.061667);
 	var work = new google.maps.LatLng(42.37, -71.08);
 	var home = new google.maps.LatLng(42.36, -71.10);
@@ -37,9 +30,15 @@ $(document).ready(function() {
 		mapTypeId: google.maps.MapTypeId.ROADMAP,
 		center: home
 	};
+
+	// init alert message
+	$(".alert").hide();
+    $(".alert .close").on('click', function (e) {
+        e.preventDefault(); 
+        $(this).parent().hide("slow");
+    });
  
-	var map = new google.maps.Map(document.getElementById("map_canvas"),
-		mapOptions);
+	var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
     
     // home and work place marker
 	var iconHome = "{{ STATIC_URL }}img/home.png";
@@ -74,13 +73,9 @@ $(document).ready(function() {
 		// write loc coord to hidden geometry field (in WGS84)
 		work = this.getPosition();
 		$("#id_work_location").val("POINT (" + this.position.lng() + " " +  this.position.lat() + ")");
-		getEmployers({
-			'lat': work.lat(), 
-			'lng': work.lng(),
-			'radius': 1609.344 // in meters
-		});
 	});
 	
+	// map animation
 	var toggleBounce = function () {
 		if (markerH.getAnimation() != null) {
 			markerH.setAnimation(null);
@@ -89,77 +84,8 @@ $(document).ready(function() {
 		}
 	}
 	
-    // random order of modes
-    $("#id_to_work_today, #id_from_work_today, #id_to_work_yesterday, #id_from_work_yesterday").shuffle();
-    
-    // hide and show optional street intersection fields
-    $("#intersection_fields").hide();
-    
-    $("#intersection_fields_link").click(function () {
-    	$("#intersection_fields").toggle(500);
-		return false;
-    });
-    
-    $("#home-town-select").change(function() {
-    	var town = $("#home-town-select option:selected").val();
-		// simple street type-ahead to limit street options
-		$.getJSON("/town/" + town + "/streets/", function(streets) {
-			$("input#id_home_street, input#id_home_cross_st").autocomplete({
-				source: streets,
-				minLength: 3
-			});
-		});
-    });
-    
-    // select employer
-    // $("#employer_fields").hide();
-
-    $("#work-town-select").change(function() {
-    	var town = $("#work-town-select option:selected").val();
-    	
-    	if (town !== "") {
-    		
-    		// add spinner
-    		var spinner = $(document.createElement("img"))
-    		.attr({ "src": "{{ STATIC_URL }}img/spinner.gif", "width": "24", "height": "24"})
-    		.css({ "margin-left" : "10px"})
-    		.insertAfter($("#work-town-select"));
-    		
-    		var employer_locations = {};
-    		
-    		$.getJSON("/town/" + town + "/employers/", function(employers) {
-    			// clear previouse dropdown options
-				$("#id_employer option").remove();
-				$("<option selected='selected' value=''>---------</option>").appendTo("#id_employer");
-    			$.each(employers, function(key, employer) {
-					$("<option value='" + employer.infousa_id + "'>" + employer.name + "</option>").appendTo("#id_employer");
-					employer_locations[employer.infousa_id] = employer.latlon;
-				});
-				// bind change event to select input
-				$("#id_employer").change(function () {
-    				var infousa_id = $("#id_employer option:selected").val();
-    				// var name = $("#employer-select option:selected").text();
-    				if (infousa_id === "") {
-    					$("#id_work_location").val("POINT (0.0000000000000000 0.0000000000000000)");
-    					work = map.getCenter();
-    				} else {
-    					var coords = employer_locations[infousa_id];
-    					work = new google.maps.LatLng(coords.split(" ")[0], coords.split(" ")[1]);
-    					$("#id_work_location").val("POINT (" + coords.split(" ")[1] + " " +  coords.split(" ")[0] + ")");
-    				}
-    				markerEmployer.setPosition(work);
-    			});
-    			// show select input
-				$("#employer_fields").show(500, function() {
-					// remove spinner
-					spinner.remove();
-				});
-    		});
-    		
-    	}
-    });
-	
 	// impact buttons
+	// use Google directions distance as base
 	var directionsService = new google.maps.DirectionsService();
 	$("#button_co2").click(function() {
 		
@@ -187,13 +113,14 @@ $(document).ready(function() {
 				}
 			});
 		} else {
-			$("#saved_co2").text("No saved CO2 emmissions today");
+			$("#saved_co2").text("No CO2 emmissions saved today.");
 		}
 		return false;
 	});
 	$("#button_calories").click(function() {
-		var weight = parseFloat($("#id_weight").val());
-		$("#id_weight").text(weight); // return float value of weight
+
+		var weight = parseFloat($("#id_weight").val()); // return float value of weight
+		$("#id_weight").text(weight); 
 		var calories = 0;
 		var duration = 0;
 		var mode_to = $("#id_to_work_today option:selected").val();
@@ -232,7 +159,6 @@ $(document).ready(function() {
 				var mets_from = 0;
 		}
 		if (weight > 0) {
-			// id_duration
 			if (mets_to !== 0) {
 		  		var request_to = {
 					origin: markerHome.getPosition(),
@@ -269,18 +195,13 @@ $(document).ready(function() {
 			}
 			if (mets_from === 0 && mets_to === 0) { 
 				// car or transit doesn't burn calories
-				$("#burned_calories").text("Too few calories burned today, try walking, biking or other active transportation modes!");
+				$("#burned_calories").text("No calories burnt today.");
 			}
 		} else {
-			$("#burned_calories").text("Please enter your weight in the above field");
+			$("#burned_calories").text("Please enter your weight first.");
 		}
 		return false;
 	});
-
-	// error modal
-	// $("#form_error_modal").modal({
-	// 	backdrop: true
-	// });
 
 	// receives an array of points and adjusts the map extent accordingly
 	var setMapBounds = function (points) {
@@ -311,9 +232,12 @@ $(document).ready(function() {
 	var geocodeAddress = function(address_type) {
 
 		var geocoder = new google.maps.Geocoder();
-		var address = $("#" + address_type + "-address").val();
+		var $address = $("#" + address_type + "-address");
+
+		// clear errors
+		$address.parentsUntil("fieldset").removeClass("error");
 		
-		geocoder.geocode( { 'address': address }, function(results, status) {
+		geocoder.geocode( { 'address': $address.val() }, function(results, status) {
 			if (status == google.maps.GeocoderStatus.OK) {
 
 				if (address_type === "home") {
@@ -327,88 +251,56 @@ $(document).ready(function() {
 					markerEmployer.setPosition(work);
 					$("#id_work_location").val("POINT (" + markerEmployer.position.lng() + " " +  markerEmployer.position.lat() + ")");
 					setMapBounds([markerHome.position, markerEmployer.position]);
-					// search for employers
-					getEmployers({
-						'lat': work.lat(), 
-						'lng': work.lng(),
-						'radius': 1609.344 // in meters
-					});
-				}		
+				}
+				$address.parentsUntil("fieldset").addClass("success");
+				$address.parent().children(".help-inline").html("The address was successfully located.");
+
+				// TODO: add zip-code fields	
 										
 			} else {
-				$("#form_error_msg").html("<p>Sorry, we couldn't find your address.</p>");
-				$("#form_error_modal").modal("show");
+				$address.parentsUntil("fieldset").addClass("error");
+				$address.parent().children(".help-inline").html("We were not able to locate that address.");
 			}
 		});
 	}
 
-	// get employer JSON based on a location
-	// data = { 'lat': latitute, 'lng': longitude, 'radius': radius in meters }
-	var getEmployers = function (data) {
-	
-		var employer_locations = {};
-		$.get("/employers/", data,
-		function(employers){
-			
-			var employer_locations = {};
-
-			// clear previouse dropdown options and events
-			// $("#id_employer").unbind();
-			$("#id_employer option").remove();
-			// build dropdown
-			$("<option selected='selected' value=''>---------</option>").appendTo("#id_employer");
-			$.each(employers, function(key, employer) {
-				$("<option value='" + employer.infousa_id + "'>" + employer.name + "</option>")
-				.data('latlon', employer.latlon)
-				.appendTo("#id_employer");
-			});
-			// update list
-			$("#id_employer").trigger("liszt:updated");
-			// bind change event to select input
-			$("#id_employer").chosen().change(function () {
-				var latlon = $("#id_employer option:selected").data('latlon');
-				if (latlon !== undefined) {
-					work = new google.maps.LatLng(latlon.split(" ")[0], latlon.split(" ")[1]);
-					$("#id_work_location").val("POINT (" + latlon.split(" ")[1] + " " + latlon.split(" ")[0] + ")");
-					markerEmployer.setPosition(work);
-					setMapBounds([markerHome.position, markerEmployer.position]);
-				}
-			});
-
-		}, "json");
-	}
-
 	// form validation
-	$("#commuterform").submit(function() {
+	$("#commuterform").on("submit", function () {
+
+		// clear error messages
+		$("#submit-error").hide();
 		
 		// check for valid email
-		var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+		var emailReg = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 		if (emailReg.test($("#id_email").val()) === false || $("#id_email").val() === "") {
-			$("#form_error_msg").html("<p>Please provide a valid email address.</p>");
-			$("#form_error_modal").modal("show");
+			$("#submit-error .alert-heading").html("Error #1: Invalid Email Address");
+			$("#submit-error p").html("Please provide a valid email address.");
+			$("#submit-error").show("slow"); 
 			return false;
 		}
 
 		// check locations
 		if ($("#id_home_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
-			// no marker and no intersection
-			if ($("#id_home_street").val() === "" || $("#id_home_cross_st").val() === "" ) {
-				$("#form_error_msg").html("<p>Please provide your home location.</p>");
-				$("#form_error_modal").modal("show");
-				return false;
-			}
+			$("#submit-error .alert-heading").html("Error #2: No Home or Start Location");
+			$("#submit-error p").html("Please provide your home or start location.");
+			$("#submit-error").show("slow"); 
+			return false;
 		}
 		if ($("#id_work_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
-			$("#form_error_msg").html("<p>Please provide your work-place location.</p>");
-			$("#form_error_modal").modal("show");
+			$("#submit-error .alert-heading").html("Error #2: No Work or End Location");
+			$("#submit-error p").html("Please provide your work or end location.");
+			$("#submit-error").show("slow");
 			return false;
 		}
 		if ($("#id_to_work_today option:selected").val() === "" && $("#id_from_work_today option:selected").val() === "") {
-			$("#form_error_msg").html("<p>Please tell us how you commuted to and from work today.</p>");
-			$("#form_error_modal").modal("show");
+			$("#submit-error .alert-heading").html("Error #2: No Mode selected");
+			$("#submit-error p").html("Please tell us how you commuted to and from work today.");
+			$("#submit-error").show("slow");
 			return false;
 		}
    });
+
+
     
 });
 
@@ -427,148 +319,159 @@ $(document).ready(function() {
 	<div class="row">
 	  <div class="span12">
 
-			<form id="commuterform" action="." method="POST">
+			<form id="commuterform" class="form-horizontal" action="." method="POST">
 				
 				{% csrf_token %}
 
-				<fieldset>
-			    	<h3>1. Please tell us about yourself:</h3>
-			    	<div class="clearfix">
-						<label>Your name</label><div class="input">{{ commuterform.name }}</div>
+				<fieldset class="well">
+			    	<h2>1. Please tell us about yourself</h2>
+			    	<div class="control-group">
+						<label class="control-label">Your name</label>
+						<div class="controls">{{ commuterform.name }}</div>
 					</div>
-					<div class="clearfix">
-						<label>Your phone number</label><div class="input">{{ commuterform.phone }}</div>
+					<div class="control-group">
+						<label class="control-label">Your email (<span class="required_field">required</span>)</label>
+						<div class="controls">
+							{{ commuterform.email }}<span class="help-inline">We respect your privacy and won't share any information.</span>
+						</div>
 					</div>
-					<div class="clearfix">
-						<label>Your email (<span class="required_field">required</span>)</label><div class="input">{{ commuterform.email }}<span class="help-block">We respect your privacy and won't share any information.</span></div>
-					</div>
-					<div class="clearfix">
-						<label>I would like to subscribe to your monthly newsletter.</label><div class="input">{{ commuterform.newsletter }}</div> 
+					<div class="control-group">
+						<div class="controls">
+              				<label class="checkbox">
+                				{{ commuterform.newsletter }}
+                				I would like to subscribe to your monthly newsletter
+              				</label>
+            			</div>
 					</div>
 			    </fieldset>
 
-				<fieldset>
+				<fieldset class="well">
 					
-					<h3>2. Please tell us about your commute (<span class="required_field">required</span>):</h3>
+					<h2>2. Please tell us about your commute</h2>
 
-					<p>Please tell us where your commute started and ended today. Please use the address fields or drag and drop the icons.</p>
+					<h3>Where did your commute start and end today (<span class="required_field">required</span>)?</h3> 
 
-					<div class="clearfix">
-						<label>Enter your home address:</label><div class="input"><img src="{{ STATIC_URL }}img/home.png" height="26" alt="Home marker" class="marker"> <input type="text" id="home-address" /> <a id="locate_home" class="btn">Locate</a></div>
+					<div class="control-group">
+						<label class="control-label">Home or start address:</label>
+						<div class="controls">
+							<input type="text" id="home-address" placeholder="1 Main St, Boston, MA 02111" />&nbsp;<a id="locate_home" class="btn">Locate</a>
+							<span class="help-inline"></span>
+						</div>
 					</div>
-					<div class="clearfix">
-						<label>Enter your work address:</label><div class="input"><img src="{{ STATIC_URL }}img/factory.png" height="26" alt="Home marker" class="marker"> <input type="text" id="work-address" /> <a id="locate_work" class="btn">Locate</a></div>
+					<div class="control-group">
+						<label class="control-label">Work or end address:</label>
+						<div class="controls">
+							<input type="text" id="work-address" placeholder="1 Main St, Boston, MA 02111" />&nbsp;<a id="locate_work" class="btn">Locate</a>
+							<span class="help-inline"></span>
+						</div>
 					</div>
 
-					<div id="map_canvas">map div</div>
-					<p id="map_legend" class="small"><img src="{{ STATIC_URL }}img/home.png" height="20" alt="Home marker" > {% blocktrans %}for home{% endblocktrans %}, and <img src="{{ STATIC_URL }}img/factory.png" height="20" alt="Home marker" > for workplace</p>
+					<p>You can <a data-toggle="collapse" data-target="#map_container" href="javascript:void(0)">view the map</a>, to verify and make sure we located your addresses correctly</p>
+
+					<div id="map_container" class="collapse">
+						<div id="map_canvas" class="well">map div</div>
+						<p class="help-block">Drag and drop your <img src="{{ STATIC_URL }}img/home.png" alt="Home marker" > home and <img src="{{ STATIC_URL }}img/factory.png" alt="Home marker" > work location to the correct spot on the map if they seem wrong.</p>						
+					</div>
 				
 					{{ commuterform.home_location }}
 					{{ commuterform.work_location }}
 					{{ commuterform.distance }}
 					{{ commuterform.duration }}
 					
-					<h4>How did you commute today, on Walk/Ride Day (<span class="required_field">required</span>)?</h4>
+					<h3>How did you commute today, on Walk/Ride Day (<span class="required_field">required</span>)?</h3>
 
-					<div class="clearfix">
-						<label>To work today:</label> <div class="input">{{ commuterform.to_work_today }}</div>
-						<label>From work today:</label><div class="input">{{ commuterform.from_work_today }}<span class="help-block">Please refer to the longest leg of your commute.</span></div>
+					<p>Please refer to the longest leg of your commute.</p>
 
+					<div class="control-group">
+						<label class="control-label">To work today:</label>
+						<div class="controls">{{ commuterform.to_work_today }}</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">From work today:</label>
+						<div class="controls">{{ commuterform.from_work_today }}</div>
 					</div>
 
-					<h4>How do you normally commute?</h4>
+					<h3>How do you normally commute?</h3>
 
-					<div class="clearfix">
-						<label>To work on a usual day:</label> <div class="input">{{ commuterform.to_work_yesterday }}</div>
-						<label>From work on a usual day:</label><div class="input">{{ commuterform.from_work_yesterday }}<span class="help-block">Please refer to the longest leg of your commute.</span></div>
+					<div class="control-group">
+						<label class="control-label">Normally to work by:</label>
+						<div class="controls">{{ commuterform.to_work_yesterday }}</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">Normally from work by:</label>
+						<div class="controls">{{ commuterform.from_work_yesterday }}</div>
 					</div>
 
-					<div class="alert-message block-message info">
+					<h3>Record more green travels today?</h3>
 
-						<h4>See the impact you had today:</h4><span class="help-block"></span>
-						
-						<div class="clearfix">
-							<label>Saved CO<sub>2</sub> emissions:</label> <div class="input" id="saved_co2">Click button below to calculate</div>
-							<button id="button_co2" class="btn impact">Calculate CO2</button>
-							<span class="help-block impact">Per EPA standards and assumptions, compared to commuting by car alone.</span>
+					<div class="control-group">
+						<div class="controls">
+							<label class="checkbox">
+							{{ commuterform.other_greentravel }}
+							I also used green transportation for shopping, errands, or social visits today
+							</label>
 						</div>
-						
-						<div class="clearfix">
-							{{ commuterform.weight.errors }}
-							<label>Your weight [lbs]:</label> <div class="input">{{ commuterform.weight }}</div>
-							<label>Your burned calories:</label> <div id="burned_calories" class="input">Enter your weight and click button below to calculate</div>
-							<button id="button_calories" class="btn impact">Calculate Calories</button>
-							<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car alone or transit.</span>
-						</div>
-
-					</div>
-
-					<h4>Record more green travels today?</h4>
-
-					<div class="clearfix">
-						<label>I also used green transportation for shopping, errands, or social visits today.</label><div class="input">{{ commuterform.other_greentravel }}</div>
 					</div>
 					
 				</fieldset>
-					
-				<fieldset>
-					
-					<h3>3. Please tell us where you work:</h3>
-					
+
+				<fieldset class="well">					
+
+					<h2>3. Please tell us where you work</h2>
+
 					<div id="employer_fields">
-						<div class="clearfix">
-							<label>Please select your employer:</label>
-							<div class="input">
-								<select class="chzn-select" id="id_employer" name="employer" tabindex="2">
-									<option selected="selected" value="">Please specify your work location in Question 1 first.</option>
-								</select>
-							</div>
+						<div class="control-group">	
+							<label class="control-label">Select your employer:</label>						
+							<div class="controls"></div>
 						</div>
-						<div class="clearfix">
-							<label>other: </label><div class="input">{{ commuterform.other_employer }}</div>
+						<div class="control-group">
+							<label class="control-label">other: </label>
+							<div class="controls">{{ commuterform.other_employer }}</div>
 						</div>
 					</div>
 
 				</fieldset>
-				
-				<fieldset>
 
-					<h3>4. Get involved!</h3>
+				<div class="alert alert-success">
 
-					<div class="clearfix">
-						<label>My workplace, school or other organization would like to get involved and promote Walk/Ride Days, and I will be the on-site contact person.</label><div class="input">{{ commuterform.coordinator }}</div>
-					</div>
-					<div class="clearfix">
-						<label>I would like to help Green Streets by volunteering in another capacity.</label><div class="input">{{ commuterform.volunteer }}</div>
-					</div>
-
-					<div class="clearfix">
-						<label>My workplace would like to sponsor Walk/Ride Days at a local school or event.</label><div class="input">{{ commuterform.potential_sponsor }}</div>
-					</div>
-
-					<div class="clearfix">
-						<label>I will take advantage of incentives offered by Walk/Ride Day Retail Partners to participants.</label><div class="input">{{ commuterform.sponsor }}</div>
+					<h3>See the impact you had today</h3>
+					
+					<div class="control-group">
+						<label class="control-label">Saved CO<sub>2</sub> emissions:</label>
+						<div class="controls">
+							<span class="input uneditable-input" id="saved_co2">Click button below to calculate</span>
+						</div>
+						<div class="controls">
+							<button id="button_co2" class="btn impact">Calculate CO2</button><span class="help-inline">Per EPA standards and assumptions, compared to commuting by car alone.</span>
+						</div>
 					</div>
 					
-					<div class="clearfix">
-						<label>Additional thoughts or feedback in general, about Walk/Ride Days or your green commute:</label><div class="input">{{ commuterform.feedback }}</div>
+					<div class="control-group">
+						{{ commuterform.weight.errors }}
+						<label class="control-label">Your weight [lbs]:</label>
+						<div class="controls">{{ commuterform.weight }}</div>
+						<label class="control-label">Your burned calories:</label>
+						<div class="controls">
+							<span class="input uneditable-input" id="burned_calories">Click button below to calculate</span>
+						</div>
+						<div class="controls">
+							<button id="button_calories" class="btn impact">Calculate Calories</button><span class="help-inline">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car alone or transit.</span>
+						</div>
 					</div>
 
-				</fieldset>	
+				</div>
 
-				<button id="button_submit" type="submit" class="btn large primary">Check-in your commute!</button>
+				<div id="submit-error" class="alert alert-error">
+			    	<a class="close" href="#">&times;</a>
+			    	<h4 class="alert-heading"></h4>
+			    	<p></p>
+			    </div>
+
+				<div class="form-actions">
+					<button id="button_submit" type="submit" class="btn btn-large btn-success">Check-in your commute!</button>
+				</div>			
 
 			</form>
-
-
-
-			<div id="form_error_modal" class="modal hide fade">
-				<div class="modal-header">
-					<a href="#" class="close">&times;</a>
-					<h3>Error</h3>
-				</div>
-				<div id="form_error_msg" class="modal-body"></div>
-			</div>
 
 		</div>
 	</div>
