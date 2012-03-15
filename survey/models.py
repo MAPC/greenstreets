@@ -180,10 +180,12 @@ class Commutersurvey(models.Model):
     walkrideday = models.ForeignKey('Walkrideday', blank=True, null=True)
     
     home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
+    home_address = models.CharField(max_length=200)
     
     employer = models.ForeignKey('Employer', to_field='infousa_id', blank=True, null=True)
     other_employer = models.CharField(max_length=50, blank=True, null=True)
     work_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)')
+    work_address = models.CharField(max_length=200)
     
     distance = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
     duration = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)

@@ -4,6 +4,12 @@ from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer
 # from django.contrib import admin
 from django.contrib.gis import admin
 
+
+# default GeoAdmin overloads
+admin.GeoModelAdmin.default_lon = -7915039
+admin.GeoModelAdmin.default_lat = 5216500 #5220376  
+admin.GeoModelAdmin.default_zoom = 12
+
 class DistrictAdmin(admin.OSMGeoAdmin):
     prepopulated_fields = {'slug': ('distname',)}
 
