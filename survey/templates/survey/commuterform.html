@@ -18,7 +18,7 @@ $(document).ready(function() {
     var cachedForm = $.jStorage.get("commuterform"); 
     if (cachedForm) {
         $.each(cachedForm, function(key, obj) {
-            if (obj.name !== "csrfmiddlewaretoken") {
+            if (jQuery.inArray(obj.name, ["csrfmiddlewaretoken", "month"]) < 0) {
                 var $formElement = $("input[name=" + obj.name + "]");
 
                 if ($formElement.attr("type") === "checkbox") {
@@ -46,12 +46,34 @@ $(document).ready(function() {
         }
     }
 
+    // set to current Month build month dropdown for +/- 6 months
+    var d = new Date();
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var months_sorted = [];
+    $.each(months, function (key, month) {
+        var thisMonth = d.getMonth();
+        var year = d.getFullYear();
+        if (key > thisMonth - 7 + 12) {
+            year--;
+        } else if (key < (thisMonth - 6)) {
+            year++;
+        }
+        month_nr = (key.toString().length < 2) ? ("0" + key.toString()) : key.toString();
+        months_sorted.push(year + month_nr + "|" + month + " " + year);
+    });
+    $.each(months_sorted.sort(), function (key, month) {
+        var value = month.split("|")[1];
+        $("#id_month").append("<option value='" + value + "'>" + value + "</option>");
+    });
+    $("#id_month").val(months[d.getMonth()] + " " + d.getFullYear());
     
+
     var mapOptions = {
         zoom: 11,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         center: home
     };
+
 
     // init alert message
     $("#submit-error").hide();
@@ -245,7 +267,7 @@ $(document).ready(function() {
         // key = enter
         if(e.which == 13) {
             // home or work
-            var address_type = this.id.split("-")[0];
+            var address_type = this.id.split("_")[1];
             geocodeAddress(address_type);
         }
     });
@@ -291,9 +313,6 @@ $(document).ready(function() {
     // form validation
     $("#commuterform").on("submit", function () {
 
-        // store form data on client
-        $.jStorage.set("commuterform", $(this).serializeArray());
-
         // clear error messages
         $("#submit-error").hide();
         
@@ -325,6 +344,9 @@ $(document).ready(function() {
             $("#submit-error").show("slow");
             return false;
         }
+
+        // store form data on client
+        $.jStorage.set("commuterform", $(this).serializeArray());
    });
 
 
@@ -349,6 +371,15 @@ $(document).ready(function() {
             <form id="commuterform" class="form-horizontal" action="." method="POST">
                 
                 {% csrf_token %}
+
+                <fieldset class="well">
+                    <div class="control-group">
+                        <label class="control-label">You are checking in for:</label>
+                        <div class="controls">
+                            <select id="id_month" name="month"></select>
+                        </div>
+                    </div>
+                </fieldset>
 
                 <fieldset class="well">
                     <h2>1. Please tell us about yourself (<span class="required_field">required</span>)</h2>

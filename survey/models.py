@@ -161,15 +161,14 @@ class Street(models.Model):
 
 
 COMMUTER_MODES = (
-            ('c', _('Car')),
-            ('w', _('Walk')),
-            ('b', _('Bike')),
-            ('cp', _('Carpool')),
-            ('t', _('Transit (bus, subway, train, etc.)')),
-            ('o', _('Other (skateboard, scooter, inline skates, etc.)')),
-            ('tc', _('Telecommuting')),
-            )
-
+        ('c', _('Car')),
+        ('w', _('Walk')),
+        ('b', _('Bike')),
+        ('cp', _('Carpool')),
+        ('t', _('Transit (bus, subway, train, etc.)')),
+        ('o', _('Other (skateboard, scooter, inline skates, etc.)')),
+        ('tc', _('Telecommuting')),
+    )
  
 class Commutersurvey(models.Model):
     """
@@ -178,6 +177,8 @@ class Commutersurvey(models.Model):
     """
     
     walkrideday = models.ForeignKey('Walkrideday', blank=True, null=True)
+
+    month = models.CharField('Walkrideday Month', max_length=50)
     
     home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
     home_address = models.CharField(max_length=200)
@@ -211,6 +212,7 @@ class Commutersurvey(models.Model):
     other_greentravel = models.BooleanField(default=False)
     
     ip = models.IPAddressField('IP Address', blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
     
     objects = models.GeoManager()
     
