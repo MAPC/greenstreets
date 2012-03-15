@@ -32,7 +32,7 @@ $(document).ready(function() {
 	};
 
 	// init alert message
-	$(".alert").hide();
+	$("#submit-error").hide();
     $(".alert .close").on('click', function (e) {
         e.preventDefault(); 
         $(this).parent().hide("slow");
@@ -324,13 +324,13 @@ $(document).ready(function() {
 				{% csrf_token %}
 
 				<fieldset class="well">
-			    	<h2>1. Please tell us about yourself</h2>
+			    	<h2>1. Please tell us about yourself (<span class="required_field">required</span>)</h2>
 			    	<div class="control-group">
 						<label class="control-label">Your name</label>
 						<div class="controls">{{ commuterform.name }}</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label">Your email (<span class="required_field">required</span>)</label>
+						<label class="control-label">Your email</label>
 						<div class="controls">
 							{{ commuterform.email }}<span class="help-inline">We respect your privacy and won't share any information.</span>
 						</div>
@@ -439,10 +439,12 @@ $(document).ready(function() {
 					<div class="control-group">
 						<label class="control-label">Saved CO<sub>2</sub> emissions:</label>
 						<div class="controls">
-							<span class="input uneditable-input" id="saved_co2">Click button below to calculate</span>
+							<span class="input uneditable-input" id="saved_co2">Click button below to calculate</span><span class="help-inline">Per EPA standards and assumptions, compared to commuting by car alone.</span>
 						</div>
 						<div class="controls">
-							<button id="button_co2" class="btn impact">Calculate CO2</button><span class="help-inline">Per EPA standards and assumptions, compared to commuting by car alone.</span>
+							
+							<button id="button_co2" class="btn impact">Calculate CO2</button>
+							
 						</div>
 					</div>
 					
@@ -452,10 +454,10 @@ $(document).ready(function() {
 						<div class="controls">{{ commuterform.weight }}</div>
 						<label class="control-label">Your burned calories:</label>
 						<div class="controls">
-							<span class="input uneditable-input" id="burned_calories">Click button below to calculate</span>
+							<span class="input uneditable-input" id="burned_calories">Click button below to calculate</span><span class="help-inline">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car alone or transit.</span>
 						</div>
 						<div class="controls">
-							<button id="button_calories" class="btn impact">Calculate Calories</button><span class="help-inline">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car alone or transit.</span>
+							<button id="button_calories" class="btn impact">Calculate Calories</button>
 						</div>
 					</div>
 
