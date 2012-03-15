@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.views.decorators.cache import never_cache
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q
 from django.utils import simplejson
@@ -12,7 +11,7 @@ from datetime import date, timedelta
 
 from django.forms.models import inlineformset_factory
 
-from survey.models import School, Studentsurvey, Child, Schooldistrict, Street, Town, Commutersurvey, Employer, Walkrideday
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Street, Town, Commutersurvey, Employer, EmployerGSI, Walkrideday
 from survey.forms import StudentForm, ChildForm, CommuterForm
 
 
@@ -157,7 +156,6 @@ def get_streets(request, slug, regional_unit):
     return HttpResponse(simplejson.dumps(street_list), mimetype='application/json')
 
 
-@never_cache
 def student(request):
     """
     Renders Studentform or saves it and related Childforms in case of POST request. 
@@ -196,7 +194,6 @@ def student(request):
         return render_to_response('survey/studentform.html', locals(), context_instance=RequestContext(request))
 
 
-@never_cache
 def commuter(request):
     """
     Renders Commuterform or saves it in case of POST request. 
@@ -212,10 +209,19 @@ def commuter(request):
 
     commutersurvey = Commutersurvey()
 
+    employers = EmployerGSI.objects.filter(active=True)
+
     if request.method == 'POST':
         commuterform = CommuterForm(request.POST, instance=commutersurvey)
         commutersurvey.ip = request.META['REMOTE_ADDR']
         commutersurvey.walkrideday = wrday
+
+        # add new employer to GSI Employer list
+        employer = request.POST['other_employer']
+        if employer != "" and not EmployerGSI.objects.filter(name__exact=employer):
+            new_employer = EmployerGSI(name=employer)
+            new_employer.save()
+
         if commuterform.is_valid():
             commuterform.save()
             return render_to_response('survey/thanks.html', locals(), context_instance=RequestContext(request))

@@ -1,6 +1,6 @@
 from django.forms import ModelForm, TextInput
 
-from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Commutersurvey, Walkrideday, Sponsor
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Commutersurvey, Walkrideday, Sponsor, EmployerGSI
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -60,6 +60,12 @@ class EmployerAdmin(admin.OSMGeoAdmin):
 class WalkridedayAdmin(admin.ModelAdmin):
     list_display = ['date', 'start_date', 'end_date']
 
+class EmployerGSIAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+    list_display_links = ['id']
+    list_display = ['id', 'name']
+    list_editable = ['name']
+
 admin.site.register(Schooldistrict, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
 admin.site.register(Studentsurvey, StudentsurveyAdmin)
@@ -69,3 +75,4 @@ admin.site.register(Street, admin.OSMGeoAdmin)
 admin.site.register(Commutersurvey, CommutersurveyAdmin)
 admin.site.register(Walkrideday, WalkridedayAdmin)
 admin.site.register(Sponsor, SponsorAdmin)
+admin.site.register(EmployerGSI, EmployerGSIAdmin)

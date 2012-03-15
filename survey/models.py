@@ -116,6 +116,21 @@ class Employer(models.Model):
         ordering = ['name']
 
 
+class EmployerGSI(models.Model):
+    """ Greens Streets Initiative Employer list """
+
+    name = models.CharField("Employer name", max_length=200)
+    active = models.BooleanField("Show in Commuter-Form", default=True)
+
+    class Meta:
+        verbose_name = _('GSI Employer')
+        verbose_name_plural = _('GSI Employers')
+        ordering = ['name']
+
+    def __unicode__(self):
+        self.name
+    
+
 class Sponsor(models.Model):
     """ Walk/Ride day sponsors, likely also an Employer """
     name_alt = models.CharField('Alternative Name', max_length=30, blank=True, null=True)
