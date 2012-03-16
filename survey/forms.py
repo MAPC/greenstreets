@@ -23,6 +23,9 @@ class TeacherForm(ModelForm):
     class Meta:
         model = Teachersurvey
         exclude = ('ip', 'created')
+        widgets = {
+          'school': HiddenInput(),   
+        }
 
 
 class StudentgroupForm(ModelForm):

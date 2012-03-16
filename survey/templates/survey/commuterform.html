@@ -53,17 +53,17 @@ $(document).ready(function() {
     $.each(months, function (key, month) {
         var thisMonth = d.getMonth();
         var year = d.getFullYear();
-        if (key > thisMonth - 7 + 12) {
+        if (key > thisMonth - 7 + 12) { // month of previous year
             year--;
-        } else if (key < (thisMonth - 6)) {
+        } else if (key < (thisMonth - 6)) { // month of following year
             year++;
         }
         month_nr = (key.toString().length < 2) ? ("0" + key.toString()) : key.toString();
         months_sorted.push(year + month_nr + "|" + month + " " + year);
     });
-    $.each(months_sorted.sort(), function (key, month) {
-        var value = month.split("|")[1];
-        $("#id_month").append("<option value='" + value + "'>" + value + "</option>");
+    $.each(months_sorted.sort(), function (key, month_sorted) {
+        var month = month_sorted.split("|")[1];
+        $("#id_month").append("<option value='" + month + "'>" + month + "</option>");
     });
     $("#id_month").val(months[d.getMonth()] + " " + d.getFullYear());
     
@@ -248,8 +248,7 @@ $(document).ready(function() {
     });
 
     // receives an array of points and adjusts the map extent accordingly
-    var setMapBounds = function (points) {
-        
+    var setMapBounds = function (points) {  
         var mapbounds = new google.maps.LatLngBounds();
         $.each(points, function(index, point) { 
             mapbounds.extend(point);
@@ -259,15 +258,12 @@ $(document).ready(function() {
 
     // trigger geocoding given address and move markers on map
     $("#locate_home, #locate_work").click(function() {
-        // home or work
-        var address_type = this.id.split("_")[1];
+        var address_type = this.id.split("_")[1]; // home or work
         geocodeAddress(address_type);
     });
     $("#id_home_address, #id_work_address").keyup(function(e) {
-        // key = enter
-        if(e.which == 13) {
-            // home or work
-            var address_type = this.id.split("_")[1];
+        if(e.which == 13) { // key = 'enter'
+            var address_type = this.id.split("_")[1]; // home or work
             geocodeAddress(address_type);
         }
     });
@@ -300,9 +296,7 @@ $(document).ready(function() {
                 }
                 $address.parentsUntil("fieldset").addClass("success");
                 $address.parent().children(".help-inline").html("The address was successfully located.");
-
-                // TODO: add zip-code fields    
-                                        
+                                           
             } else {
                 $address.parentsUntil("fieldset").addClass("error");
                 $address.parent().children(".help-inline").html("We were not able to locate that address.");
@@ -318,14 +312,14 @@ $(document).ready(function() {
         
         // check for valid email
         var emailReg = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-        if (emailReg.test($("#id_email").val()) === false || $("#id_email").val() === "") {
+        if (emailReg.test($("#id_email").val()) === false) {
             $("#submit-error .alert-heading").html("Error #1: Invalid Email Address");
             $("#submit-error p").html("Please provide a valid email address.");
             $("#submit-error").show("slow"); 
             return false;
         }
 
-        // check locations
+        // check locations for default locations
         if ($("#id_home_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
             $("#submit-error .alert-heading").html("Error #2: No Home or Start Location");
             $("#submit-error p").html("Please provide your home or start location.");
@@ -338,6 +332,8 @@ $(document).ready(function() {
             $("#submit-error").show("slow");
             return false;
         }
+
+        // no mode selected
         if ($("#id_to_work_today option:selected").val() === "" && $("#id_from_work_today option:selected").val() === "") {
             $("#submit-error .alert-heading").html("Error #2: No Mode selected");
             $("#submit-error p").html("Please tell us how you commuted to and from work today.");

@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block javascript %}
+
+<script src="{{ STATIC_URL }}libs/bootstrap/js/bootstrap.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}libs/jstorage.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+    // load data from client
+    var cachedForm = $.jStorage.get("commuterform"); 
+    if (cachedForm) {
+        $.each(cachedForm, function(key, obj) {
+            if (jQuery.inArray(obj.name, ["csrfmiddlewaretoken", "month"]) < 0) {
+                var $formElement = $("input[name=" + obj.name + "]");
+
+                if ($formElement.attr("type") === "checkbox") {
+                    $formElement.prop("checked", true);
+                } else if (jQuery.inArray($formElement.attr("type"), ["text", "hidden"]) > -1) {
+                    $formElement.val(obj.value);
+                } else {
+                    // we only have selects
+                    $formElement = $("select[name=" + obj.name + "]")
+                    $formElement.val(obj.value);
+                }
+            }
+        });
+    }
+
+    // set to current Month build month dropdown for +/- 6 months
+    var d = new Date();
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var months_sorted = [];
+    $.each(months, function (key, month) {
+        var thisMonth = d.getMonth();
+        var year = d.getFullYear();
+        if (key > thisMonth - 7 + 12) { // month of previous year
+            year--;
+        } else if (key < (thisMonth - 6)) { // month of following year
+            year++;
+        }
+        month_nr = (key.toString().length < 2) ? ("0" + key.toString()) : key.toString();
+        months_sorted.push(year + month_nr + "|" + month + " " + year);
+    });
+    $.each(months_sorted.sort(), function (key, month_sorted) {
+        var month = month_sorted.split("|")[1];
+        $("#id_month").append("<option value='" + month + "'>" + month + "</option>");
+    });
+    $("#id_month").val(months[d.getMonth()] + " " + d.getFullYear());
+
+    // init alert message
+    $("#submit-error").hide();
+    $(".alert .close").on('click', function (e) {
+        e.preventDefault(); 
+        $(this).parent().hide("slow");
+    });
+
+    // school selector
+    $("#school-select-container").hide();
+    $("#school-district-select").change(function() {
+        var district = $("#school-district-select option:selected").val();
+        var school_locations = {};
+        $.getJSON("/district/" + district + "/schools/", function(schools) {
+            // remove previous schools
+            $("#school-select option").remove();
+            $("<option selected='selected' value=''>---------</option>").appendTo("#school-select");
+            $.each(schools, function(id, school) {
+                $("<option value='" + school['id'] + "'>" + school['name'] + "</option>").appendTo("#school-select");
+            });
+            // bind change event to select input
+            $("#school-select").change(function () {
+                $("#id_school").val($("#school-select option:selected").val());
+            });
+            $("#school-select-container").show(500);
+        });
+        
+    });
+
+    // add studentgroup
+    // zero-based
+    var studentgroups = 0
+    $("#add_studentgroup").on("click", function () {
+        studentgroups++;
+        // clone template fieldset 0 and insert before button
+        $("#id_studentgroup_set-0").clone().insertBefore($(this)).attr("id", "id_studentgroup_set-" + studentgroups);
+        $("#id_studentgroup_set-" + studentgroups + " input, #id_studentgroup_set-" + studentgroups + " select").each(function (index) {
+            $(this).val("");
+            $(this).attr({
+                id: $(this).attr("id").replace("0", studentgroups),
+                name: $(this).attr("name").replace("0", studentgroups)
+            });
+        });
+    });
+
+    // form validation
+    $("#commuterform").on("submit", function () {
+
+        // clear error messages
+        $("#submit-error").hide();
+        
+        // check for valid email
+        var emailReg = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        if (emailReg.test($("#id_teacher_email").val()) === false) {
+            $("#submit-error .alert-heading").html("Error #1: Invalid Email Address");
+            $("#submit-error p").html("Please provide a valid email address.");
+            $("#submit-error").show("slow"); 
+            return false;
+        }
+
+        // check if we have at least number of students for all studentgroups
+        $("fieldset.studentgroup").each(function (index) {
+            var intReg = /^\d+$/;
+            if ($("input[id$='number']", this).val() === "" || intReg.test($("input[id$='number']", this).val()) === false) {
+                $("#submit-error .alert-heading").html("Error #3: Invalid number of students");
+                $("#submit-error p").html("Please provide a valid number of students for each student group.");
+                $("#submit-error").show("slow"); 
+                return false;
+            }
+        });
+
+        // store form data on client
+        $.jStorage.set("commuterform", $(this).serializeArray());
+   });
+});
+
+</script>
+
+{% endblock %}
+
+{% block pageheader %}
+    <h1>Check-in your students' commute to school!</h1>
+    <p class="lead">A check-in helps us monitor the impact of our initiative and involves only a few quick steps.</p>
+{% endblock pageheader %}
+
+{% block body %}
+
+<section>
+    <div class="row">
+      <div class="span12">
+
+            <form id="commuterform" class="form-horizontal" action="." method="POST">
+                
+                {% csrf_token %}
+
+                {{ surveyformset.management_form }}
+
+                <fieldset class="well">
+                    <div class="control-group">
+                        <label class="control-label">You are checking in for:</label>
+                        <div class="controls">
+                            <select id="id_month" name="month"></select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="well">
+                    <h2>1. Please tell us about yourself (<span class="required_field">required</span>)</h2>
+                    <div class="control-group">
+                        <label class="control-label">Your name</label>
+                        <div class="controls">{{ surveyform.teacher_name }}</div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Your email</label>
+                        <div class="controls">
+                            {{ surveyform.teacher_email }}<span class="help-inline">We respect your privacy and won't share any information.</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <label class="checkbox">
+                                {{ surveyform.newsletter }}
+                                I would like to subscribe to your monthly newsletter
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="well">
+                    <h2>2. Where do your students go to school (<span class="required_field">required</span>)?</h2>
+                    <div class="control-group">
+                        <label class="control-label">School district:</label>
+                        <div class="controls">
+                            <select id="school-district-select">
+                                <option selected="selected" value="">---------</option>
+                                {% for district in districts %}
+                                <option value="{{ district.slug }}">{{ district.distname }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div id="school-select-container" class="control-group">
+                        <label class="control-label">School:</label>
+                        <div class="controls">
+                            <select id="school-select"></select>
+                        </div>
+                    </div>
+                    {{ surveyform.school }}
+                </fieldset>
+
+                <div class="well">
+                    
+                    <h2>3. Please tell us about your students (<span class="required_field">required</span>)</h2>
+
+                    <p>Specify the number of students you would like to checkin, their average travel distance (to and from school combined), how they commuted today and how they commute normally to school.</p>
+
+                    {% for form in surveyformset.forms %}
+
+                        <fieldset id="id_studentgroup_set-0" class="studentgroup">
+
+                        {% for field in form %}
+                        
+                            {% if not field.is_hidden %}
+                                    <div class="control-group">
+                                        <label class="control-label">{{ field.label|safe }}:</label>
+                                        <div class="controls">
+                                            {{ field }}
+                                            <span class="help-inline">{{ field.help_text|safe }}</span>
+                                        </div>
+                                    </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                        {% endfor %}
+
+                        </fieldset>
+
+                        <a id="add_studentgroup" class="btn" href="javascript:void(0)">Add another student group</a>
+                    
+                    {% endfor %} 
+
+                </div>
+
+                <div id="submit-error" class="alert alert-error">
+                    <a class="close" href="#">&times;</a>
+                    <h4 class="alert-heading"></h4>
+                    <p></p>
+                </div>
+
+                <div class="form-actions">
+                    <button id="button_submit" type="submit" class="btn btn-large btn-success">Check-in your students!</button>
+                </div>          
+
+            </form>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

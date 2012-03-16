@@ -11,8 +11,8 @@ from datetime import date, timedelta
 
 from django.forms.models import inlineformset_factory
 
-from survey.models import School, Studentsurvey, Child, Schooldistrict, Street, Town, Commutersurvey, Employer, EmployerGSI, Walkrideday
-from survey.forms import StudentForm, ChildForm, CommuterForm
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Street, Town, Commutersurvey, Employer, EmployerGSI, Walkrideday, Teachersurvey, Studentgroup
+from survey.forms import StudentForm, ChildForm, CommuterForm, TeacherForm, StudentgroupForm
 
 
 def process_request(request):
@@ -124,13 +124,12 @@ def get_schools(request, slug):
     # check if district exists
     district = get_object_or_404(Schooldistrict.objects, slug=slug)
     
-    schools = School.objects.transform(4326).filter(districtid=district)
+    schools = School.objects.filter(districtid=district).order_by('name')
     
-    response = {}
-    
+    # build response data
+    response = []
     for school in schools:
-        school_latlon = "%f %f" % (school.geometry.y, school.geometry.x)
-        response[school.id] = dict(name=school.name, latlon = school_latlon)
+        response.append(dict(name=school.name, id=school.id))
 
     return HttpResponse(simplejson.dumps(response), mimetype='application/json')   
     
@@ -163,7 +162,7 @@ def student(request):
 
     request = process_request(request)
 
-    # check if district exists
+    # get all districts with participating schools
     districts = Schooldistrict.objects.filter(school__survey_active=True).distinct()
 
     survey = Studentsurvey()
@@ -232,5 +231,39 @@ def commuter(request):
         commuterform = CommuterForm(instance=commutersurvey)
         towns = Town.objects.filter(survey_active=True)
         return render_to_response('survey/commuterform.html', locals(), context_instance=RequestContext(request))
+
+
+def teacher(request):
+    """ 
+    Renders Teacherform or saves it if POST
+    """
+
+    request = process_request(request)
+
+    # get all school districts with participating schools
+    districts = Schooldistrict.objects.filter(school__survey_active=True).distinct()
+
+    survey = Teachersurvey()
+
+    SurveyFormset = inlineformset_factory(Teachersurvey, Studentgroup, form=StudentgroupForm, extra=1, can_delete=False)
+
+    if request.method == 'POST':
+        surveyform = TeacherForm(request.POST, instance=survey)
+        surveyformset = SurveyFormset(request.POST, instance=survey)
+        survey.ip = request.META['REMOTE_ADDR']
+
+        if surveyformset.is_valid() and surveyform.is_valid():
+            surveyform.save()
+            surveyformset.save()
+            
+            return render_to_response('survey/thanks.html', locals(), context_instance=RequestContext(request))
+            
+        else:
+            return render_to_response('survey/teacherform.html', locals(), context_instance=RequestContext(request))
+    else:
+        surveyform = TeacherForm(instance=survey)
+        surveyformset = SurveyFormset(instance=survey)
+
+    return render_to_response('survey/teacherform.html', locals(), context_instance=RequestContext(request))
 
 

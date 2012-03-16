@@ -108,6 +108,11 @@ textarea:focus {
 	margin-top: 4px;
 }
 
+fieldset.studentgroup {
+	border-bottom: 1px solid #DDD;
+	margin-bottom: 20px;
+}
+
 
 /*
 
