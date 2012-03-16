@@ -178,7 +178,7 @@ class Commutersurvey(models.Model):
     
     walkrideday = models.ForeignKey('Walkrideday', blank=True, null=True)
 
-    month = models.CharField('Walkrideday Month', max_length=50)
+    month = models.CharField('Walk/Ride day Month', max_length=50)
     
     home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
     home_address = models.CharField(max_length=200)
@@ -221,7 +221,7 @@ class Commutersurvey(models.Model):
     
     class Meta:
         verbose_name = 'Commuter Survey'
-        verbose_name_plural = 'Commuter Surveys' 
+        verbose_name_plural = 'Commuter Surveys'     
 
 
 class Studentsurvey(models.Model):
@@ -280,21 +280,21 @@ CHILD_GRADES = (
             )
 
 CHILD_MODES = (
-            ('', '--'),
-            ('w', _('Walk')),
-            ('b', _('Bike')),
-            ('sb', _('School Bus')),
-            ('fv', _('Family Vehicle (only children in your family)')),
-            ('cp', _('Carpool (with children from other families)')),
-            ('t', _('Transit (city bus, subway, etc.)')),
-            ('o', _('Other (skateboard, scooter, inline skates, etc.)'))
-            )
+        ('w', _('Walk')),
+        ('b', _('Bike')),
+        ('sb', _('School Bus')),
+        ('fv', _('Family Vehicle (only children in your family)')),
+        ('cp', _('Carpool (with children from other families)')),
+        ('t', _('Transit (city bus, subway, etc.)')),
+        ('o', _('Other (skateboard, scooter, inline skates, etc.)'))
+    )
 
 CHILD_DROPOFF = (
             ('', '--'),
             ('yes', _('Yes')),
             ('no', _('No')),
             )
+
     
 class Child(models.Model):
     """ A child that's checked in at a School """
@@ -320,6 +320,48 @@ class Child(models.Model):
         
     def __unicode__(self):
         return u'%s' % (self.id)
+
+
+class Teachersurvey(models.Model):
+    """ For teachers to checkin entire classrooms or groups of students """
+
+    month = models.CharField('Walk/Ride day Month', max_length=50)
+
+    school = models.ForeignKey(School)
+
+    teacher_name = models.CharField(max_length=50, blank=True, null=True)
+
+    ip = models.IPAddressField('IP Address', blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Teachersurvey')
+        verbose_name_plural = _('Teachersurveys')
+
+    def __unicode__(self):
+        pass
     
 
+class Studentgroup(models.Model):
+    """ Group of students to be checked in """
 
+    teacher = models.ForeignKey(Teachersurvey)
+
+    number = models.IntegerField('Number of students')
+    avg_distance = models.IntegerField('Average travel distance in mi', blank=True, null=True)
+
+    to_school_today = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)
+    from_school_today = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES) 
+
+    to_school_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)
+    from_school_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES) 
+
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Studentgroup')
+        verbose_name_plural = _('Studentgroups')
+
+    def __unicode__(self):
+        pass
+    

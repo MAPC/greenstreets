@@ -1,6 +1,6 @@
 from django.forms import ModelForm, TextInput
 
-from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Commutersurvey, Walkrideday, Sponsor, EmployerGSI
+from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Commutersurvey, Walkrideday, Sponsor, EmployerGSI, Teachersurvey, Studentgroup
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -82,3 +82,5 @@ admin.site.register(Commutersurvey, CommutersurveyAdmin)
 admin.site.register(Walkrideday, WalkridedayAdmin)
 admin.site.register(Sponsor, SponsorAdmin)
 admin.site.register(EmployerGSI, EmployerGSIAdmin)
+admin.site.register(Teachersurvey, admin.ModelAdmin)
+admin.site.register(Studentgroup, admin.ModelAdmin)

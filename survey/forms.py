@@ -3,7 +3,7 @@ from django.forms import ModelForm, HiddenInput, TextInput, IntegerField, CharFi
 # lazy translation
 from django.utils.translation import ugettext_lazy as _
 
-from survey.models import Studentsurvey, Child, CHILD_MODES, CHILD_GRADES, CHILD_DROPOFF, Sponsor, School, Commutersurvey
+from survey.models import Studentsurvey, Child, CHILD_MODES, CHILD_GRADES, CHILD_DROPOFF, Sponsor, School, Commutersurvey, Teachersurvey, Studentgroup
 
 
 class CommuterForm(ModelForm):
@@ -18,6 +18,18 @@ class CommuterForm(ModelForm):
                    'duration': HiddenInput(),
                    }
 
+
+class TeacherForm(ModelForm): 
+    class Meta:
+        model = Teachersurvey
+        exclude = ('ip', 'created')
+
+
+class StudentgroupForm(ModelForm):
+    class Meta:
+        model = Studentgroup
+        exclude = ('created')
+    
 
 class StudentForm(ModelForm):
     """
