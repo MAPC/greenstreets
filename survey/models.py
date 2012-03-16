@@ -330,6 +330,8 @@ class Teachersurvey(models.Model):
     school = models.ForeignKey(School)
 
     teacher_name = models.CharField(max_length=50, blank=True, null=True)
+    teacher_email = models.EmailField()
+    newsletter = models.BooleanField(default=False)
 
     ip = models.IPAddressField('IP Address', blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -347,14 +349,14 @@ class Studentgroup(models.Model):
 
     teacher = models.ForeignKey(Teachersurvey)
 
-    number = models.IntegerField('Number of students')
-    avg_distance = models.IntegerField('Average travel distance in mi', blank=True, null=True)
+    number = models.IntegerField('Number of students', default=1)
+    distance = models.IntegerField('Travel distance', help_text='Average, in miles', blank=True, null=True)
 
     to_school_today = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)
     from_school_today = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES) 
 
-    to_school_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)
-    from_school_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES) 
+    to_school_normally = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES)
+    from_school_normally = models.CharField(max_length=2, blank=True, null=True, choices=CHILD_MODES) 
 
     created = models.DateTimeField(auto_now_add=True)
 
