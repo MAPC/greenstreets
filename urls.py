@@ -16,23 +16,17 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     
-    # Translation app
-    # (r'^rosetta/', include('rosetta.urls')),
-    
     # district/school list on front-page
-    (r'^$', 'survey.views.index'),
-    
-    # static pages
-    (r'^about/$', direct_to_template, {'template': 'survey/about.html'}),
+    url(r'^$', 'survey.views.index', name='home'),
     
     # studentform
     (r'^studentform/$', 'survey.views.student'),
     
     # commuterform
-    (r'^commuterform/$', 'survey.views.commuter'),
+    url(r'^commuterform/$', 'survey.views.commuter', name='commuterform'),
 
-    # commuterform
-    (r'^teacherform/$', 'survey.views.teacher'),
+    # teacherform
+    url(r'^teacherform/$', 'survey.views.teacher', name='teacherform'),
     
     # get data
     url(r'^town/(?P<slug>[-\w]+)/streets/$', 'survey.views.get_streets', {'regional_unit': 'town'}),
