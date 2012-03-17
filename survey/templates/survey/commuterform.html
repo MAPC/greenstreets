@@ -336,7 +336,7 @@ $(document).ready(function() {
         }
 
         // no mode selected
-        if ($("#id_to_work_today option:selected").val() === "" && $("#id_from_work_today option:selected").val() === "") {
+        if ($("#id_to_work_today option:selected").val() === "" || $("#id_from_work_today option:selected").val() === "") {
             $("#submit-error .alert-heading").html("Error #2: No Mode selected");
             $("#submit-error p").html("Please tell us how you commuted to and from work today.");
             $("#submit-error").show("slow");
