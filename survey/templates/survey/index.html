@@ -4,25 +4,25 @@
 {% block title %}Welcome!{% endblock %}
 
 {% block pageheader %}
-	<h1 class="front-page">Walk/Ride Day Pledge and Check-in</h1>
+    <h1 class="front-page">Walk/Ride Day Pledge and Check-in</h1>
 {% endblock pageheader %}
 
 {% block body %}
 
 <section class="front-page">
-	<div class="row">
-	  <div class="span12">
-	    <p class="lead">Completing this short survey for each month's <span class="wrday">Walk/Ride Day</span> helps us, you, and others, see the impact of <span class="nowrap">Walk/Ride Days</span>.</p>
-	    <p class="lead"><strong>After filling it out, you will be entered into a raffle!</strong></p>
-	    <p class="lead"><a href="{% url commuterform %}" class="btn btn-large btn-success" tabindex="3">Check-in my own commute!</a>
-		<a href="{% url studentform %}" class="btn btn-large btn-success" tabindex="5">Check-in my students' commute!</a></p>
-		<p class="lead">Thank you for checking in and for traveling sustainably!</p>
-		<p class="lead">The Green Streets Team<br />
-				<a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
-				<a href="http://www.gogreenstreets.org">www.GoGreenStreets.org</a>
-			</p>
-	  </div>
-	</div>
+    <div class="row">
+      <div class="span12">
+        <p class="lead">Completing this short survey for each month's <span class="wrday">Walk/Ride Day</span> helps us, you, and others, see the impact of <span class="nowrap">Walk/Ride Days</span>.</p>
+        <p class="lead"><strong>After filling it out, you will be entered into a raffle!</strong></p>
+        <p class="lead"><a href="{% url commuterform %}" class="btn btn-large btn-success" tabindex="3">Check-in my own commute!</a>
+        <a href="{% url studentform %}" class="btn btn-large btn-success" tabindex="5">Check-in my students' commute!</a></p>
+        <p class="lead">Thank you for checking in and for traveling sustainably!</p>
+        <p class="lead">The Green Streets Team<br />
+            <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
+            <a href="http://www.gogreenstreets.org">www.GoGreenStreets.org</a>
+        </p>
+      </div>
+    </div>
 </section>
 
 {% endblock %}

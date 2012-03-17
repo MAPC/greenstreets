@@ -59,6 +59,7 @@ def commuter(request):
             new_employer.save()
         if surveyform.is_valid():
             surveyform.save()
+            month = request.POST['month']
             return render_to_response('survey/thanks.html', locals(), context_instance=RequestContext(request))
         else:
             return render_to_response('survey/commuterform.html', locals(), context_instance=RequestContext(request))
@@ -88,6 +89,7 @@ def student(request):
         if surveyformset.is_valid() and surveyform.is_valid():
             surveyform.save()
             surveyformset.save()  
+            month = request.POST['month']
             return render_to_response('survey/thanks.html', locals(), context_instance=RequestContext(request)) 
         else:
             return render_to_response('survey/studentform.html', locals(), context_instance=RequestContext(request))

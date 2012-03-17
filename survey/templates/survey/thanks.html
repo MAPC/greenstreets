@@ -1,9 +1,25 @@
 {% extends "base.html" %}
 {% load i18n %}
 
+{% block title %}Successful Walk/Ride Day Check-in!{% endblock %}
+
+{% block pageheader %}
+    <h1 class="thanks-page">You successfully checked-in for <span class="nowrap">Walk/Ride Day {{ month }}</span></h1>
+{% endblock pageheader %}
+
 {% block body %}
 
-	<h2>{% trans "Thank you!" %}</h2>
-	<p>You successfully checked-in.</p>
+	<section class="thanks-page">
+    <div class="row">
+      <div class="span12">
+        <p class="lead"><strong>Show this page to local <a target="_blank" href="http://gogreenstreets.org/retailers">Green Streets Retail Partners</a> to be eligible for discounts and other goodies.</strong></p>
+        <p class="lead">Thank you for checking in and for traveling sustainably!</p>
+        <p class="lead">The Green Streets Team<br />
+            <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
+            <a href="http://www.gogreenstreets.org">www.GoGreenStreets.org</a>
+        </p>
+      </div>
+    </div>
+</section>
 
 {% endblock %}

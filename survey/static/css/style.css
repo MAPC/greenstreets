@@ -37,7 +37,7 @@ a, a:hover {
 /* Front Page
 -------------------------------------------------- */
 
-h1.front-page {
+.front-page, .thanks-page {
 	text-align: center;
 }
 
@@ -46,10 +46,6 @@ h1.front-page {
   margin-top: 10px;
   margin-bottom: 10px;
   font-weight: 300;
-}
-
-.front-page p {
-  text-align: center;
 }
 
 /* Footer
