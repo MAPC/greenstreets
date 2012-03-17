@@ -1,6 +1,6 @@
 from django.forms import ModelForm, TextInput
 
-from survey.models import School, Studentsurvey, Child, Schooldistrict, Employer, Street, Commutersurvey, Walkrideday, Sponsor, EmployerGSI, Teachersurvey, Studentgroup
+from survey.models import School, Schooldistrict, Commutersurvey, Employer, Studentsurvey, Studentgroup
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -42,31 +42,7 @@ class CommutersurveyAdminForm(ModelForm):
 class CommutersurveyAdmin(admin.OSMGeoAdmin):
     form = CommutersurveyAdminForm
 
-
-class SponsorAdminForm(ModelForm):
-    class Meta:
-        model = Sponsor
-        widgets = {
-            'employer': TextInput(),
-        }
-
-class SponsorAdmin(admin.ModelAdmin):
-    form = CommutersurveyAdminForm
-    
-class StudentsurveyAdmin(admin.OSMGeoAdmin):
-    list_display = ('pk','school')
-    search_fields = ['school__name']
-
-class ChildAdmin(admin.ModelAdmin):
-    list_display = ('pk','survey')
-
-class EmployerAdmin(admin.OSMGeoAdmin):
-    search_fields = ['name', 'infousa_id']
-
-class WalkridedayAdmin(admin.ModelAdmin):
-    list_display = ['date', 'start_date', 'end_date']
-
-class EmployerGSIAdmin(admin.ModelAdmin):
+class EmployerAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display_links = ['id']
     list_display = ['id', 'name']
@@ -74,13 +50,7 @@ class EmployerGSIAdmin(admin.ModelAdmin):
 
 admin.site.register(Schooldistrict, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
-admin.site.register(Studentsurvey, StudentsurveyAdmin)
-admin.site.register(Child, ChildAdmin)
-admin.site.register(Employer, EmployerAdmin)
-admin.site.register(Street, admin.OSMGeoAdmin)
 admin.site.register(Commutersurvey, CommutersurveyAdmin)
-admin.site.register(Walkrideday, WalkridedayAdmin)
-admin.site.register(Sponsor, SponsorAdmin)
-admin.site.register(EmployerGSI, EmployerGSIAdmin)
-admin.site.register(Teachersurvey, admin.ModelAdmin)
+admin.site.register(Employer, EmployerAdmin)
+admin.site.register(Studentsurvey, admin.ModelAdmin)
 admin.site.register(Studentgroup, admin.ModelAdmin)

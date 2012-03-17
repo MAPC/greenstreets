@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Walk/Ride Day Pledge and Check-In | {% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %} | Walk/Ride Day Pledge and Check-In</title>
 	<meta name="description" content="Green Streets Walk Ride Day Survey">
 	<meta name="keywords" content="Boston, Metro, Planning, Education, Survey, Pedestrian, Walking, Green Streets, Walk/Ride Day">
 	<meta name="author" content="MAPC">
@@ -41,7 +41,7 @@
 	<div class="navbar navbar-fixed-top">
 		<div class="masthead">
 			<div class="container">
-				<a href="http://www.gogreenstreets.org/" target="_blank" title="Green Streets Initiative"><img src="{{ STATIC_URL }}img/header-banner.jpg" width="1000" height="100" alt="Green Streets Initiative"></a>
+				<a href="{% url home %}" title="Green Streets Initiative"><img src="{{ STATIC_URL }}img/header-banner.jpg" width="1000" height="100" alt="Green Streets Initiative"></a>
 			</div>
 			
 		</div>
@@ -61,7 +61,7 @@
 
 		<footer class="footer">
 			<p>
-				{% trans "Questions? Please contact" %} <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
+				{% trans "Questions? Please contact" %} <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-in Question">walk-ride-days@comcast.net</a><br />
 				&copy; <a href="http://www.mapc.org" title="Metropolitan Area Planning Council">MAPC</a> 2012
 			</p>	
 		</footer>

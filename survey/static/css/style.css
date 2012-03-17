@@ -2,6 +2,10 @@ a, a:hover {
     color: #64AA4F;
 }
 
+.nowrap {
+	white-space: nowrap;
+}
+
 /* Topnav budget numbers
 -------------------------------------------------- */
 
