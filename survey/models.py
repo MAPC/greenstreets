@@ -341,7 +341,7 @@ class Teachersurvey(models.Model):
         verbose_name_plural = _('Teachersurveys')
 
     def __unicode__(self):
-        pass
+        return "%s %s" % (self.month, self.school)
     
 
 class Studentgroup(models.Model):
@@ -365,5 +365,5 @@ class Studentgroup(models.Model):
         verbose_name_plural = _('Studentgroups')
 
     def __unicode__(self):
-        pass
+        return "%s, %i students" % (self.teacher, self.number)
     
