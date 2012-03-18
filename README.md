@@ -1,8 +1,8 @@
-# Green Streets Walk/Ride day check-in
+# Green Streets Walk/Ride Day Check-in
 
 http://greenstreets.mapc.org/
 
-Scope: Develop a form to collect information for Green Streets Initiative evaluation.
+Scope: Develop "check-in" forms for commuters and teachers to collect information for Green Streets Initiative's Walk/Ride Days evaluation.
 
 MAPC Project team: Mariana Arcaya, Tim Reardon, Christian Spanring
 
@@ -12,19 +12,6 @@ Install pip-requirements with
 
 	$ pip install -r requirements.txt
 
-Get git-submodules...
-
-	$ git submodule init
-	$ git submodule update
-
-...for following projects:
-
-* [Bootstrap]
-* [Chosen]
-
 ---
 
-Copyright 2011 MAPC
-
-[Bootstrap]: http://twitter.github.com/bootstrap/
-[Chosen]: http://harvesthq.github.com/chosen/
+Copyright 2012 MAPC
