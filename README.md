@@ -1,4 +1,4 @@
-# Green Streets Walk/Ride day check-in
+# Green Streets Walk/Ride Day Check-in
 
 http://greenstreets.mapc.org/
 
@@ -14,7 +14,4 @@ Install pip-requirements with
 
 ---
 
-Copyright 2011 MAPC
-
-[Bootstrap]: http://twitter.github.com/bootstrap/
-[Chosen]: http://harvesthq.github.com/chosen/
+Copyright 2012 MAPC
