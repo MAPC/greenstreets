@@ -1,40 +1,112 @@
 {% extends "base.html" %}
 {% load i18n %}
 
+{% block title %}Welcome!{% endblock %}
+
+{% block pageheader %}
+<h1 class="front-page">Walk/Ride Day Pledge and Check-in</h1>
+{% endblock pageheader %}
+
+{% block socialmedia %}
+<div id="fb-root"></div>
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '344726352240463', // App ID
+      channelUrl : '//greenstreets.mapc.org/channel.html', // Channel File
+      status     : true, // check login status
+      cookie     : true, // enable cookies to allow the server to access the session
+      xfbml      : true  // parse XFBML
+    });
+
+    // tracking Facebook
+    FB.Event.subscribe('edge.create', function(targetUrl) {
+      _gaq.push(['_trackSocial', 'facebook', 'like', targetUrl]);
+    });
+    FB.Event.subscribe('edge.remove', function(targetUrl) {
+      _gaq.push(['_trackSocial', 'facebook', 'unlike', targetUrl]);
+    });
+  };
+
+  // Load the SDK Asynchronously
+  (function(d){
+     var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+     js = d.createElement('script'); js.id = id; js.async = true;
+     js.src = "//connect.facebook.net/en_US/all.js";
+     d.getElementsByTagName('head')[0].appendChild(js);
+   }(document));
+</script>
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+{% endblock %}
+
 {% block body %}
-<div class="row">
-	
-	<div class="span16">
+<section class="front-page">
+    <div class="row">
+      <div class="span12">
+        <p class="lead">Completing this short survey for each month's <span class="wrday">Walk/Ride Day</span> helps us, you, and others, see the impact of <span class="nowrap">Walk/Ride Days</span>.</p>
+        <p class="lead"><strong>After filling it out, you will be entered into a raffle!</strong></p>
+        <p class="lead"><a href="{% url commuterform %}" class="btn btn-large btn-success" tabindex="3">Check-in my own commute!</a>
+        <a href="{% url studentform %}" class="btn btn-large btn-success" tabindex="5">Check-in my students' commute!</a></p>
+        <p class="lead">Thank you for checking in and for traveling sustainably!</p>
+        <p class="lead">The Green Streets Team<br />
+            <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
+            <a href="http://www.gogreenstreets.org">www.GoGreenStreets.org</a>
+        </p>
+      </div>
+    </div>
+</section>
 
-		<p>Completing this short survey for each month's Walk/Ride Day helps us, you, and others, see the impact of Walk/Ride Days.</p>
+<section class="social-media front-page">
+    <div class="row">
+      <div class="span12">
+          <p class="lead">Share with your friends!</p>
+          <ul class="unstyled">
+            <li class="twitterwidget"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://greenstreets.mapc.org" data-counturl="http://greenstreets.mapc.org" data-related="walkridedays" data-text="I'm going green today!" data-hashtags="walkrideday">Tweet</a>
+            <script>
+            window.twttr = (function (d,s,id) {
+              var t, js, fjs = d.getElementsByTagName(s)[0];
+              if (d.getElementById(id)) return; js=d.createElement(s); js.id=id;
+              js.src="//platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs);
+              return window.twttr || (t = { _e: [], ready: function(f){ t._e.push(f) } });
+            }(document, "script", "twitter-wjs"));
 
-		<p><strong>After filling it out, you will be entered into a raffle!</strong></p>
-
-		<p>Thank you for checking in and for traveling sustainably!</p>
-
-		<p>The Green Streets Team<br />
-			<a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
-			<a href="http://www.gogreenstreets.org">www.GoGreenStreets.org</a>
-		</p>
-
-	</div>
-	
-	<div class="span6 offset2 center">
-		
-		<a href="{% if not wrday %}#{% else %}/commuterform/{% endif %}" class="btn primary large {% if not wrday %}disabled{% endif %}" tabindex="3">Check-in my own commute!</a>
-		
-	</div>
-	
-	<div class="span6 center">
-		
-		<a href="{% if not wrday %}#{% else %}/studentform/{% endif %}" class="btn primary large {% if not wrday %}disabled{% endif %}" tabindex="5">Check-in my child's commute!</a>
-		
-	</div>
-	
-	{% if not wrday %}<div class="span12 offset2 center"><p>Check-Ins are currently disabled. Please visit us again for the next Walk/Ride Day on <strong>{{ wrday_next.date }}</strong>.</p>
-	<p>In the meantime, if you haven't already, please <a href="http://www.surveymonkey.com/s.aspx?sm=JNNjmhamGdFGqFw_2bStaZbw_3d_3d">sign up here</a> to receive our monthly reminder.</p></div>
-
-	{% endif %}
-	
-</div>
+                // tracking Twitter
+                function extractParamFromUri(uri, paramName) {
+                  if (!uri) {
+                    return;
+                  }
+                  var regex = new RegExp('[\\?&#]' + paramName + '=([^&#]*)');
+                  var params = regex.exec(uri);
+                  if (params != null) {
+                    return unescape(params[1]);
+                  }
+                  return;
+                }
+                function trackTwitter(intent_event) {
+                if (intent_event) {
+                  var opt_pagePath;
+                  if (intent_event.target && intent_event.target.nodeName == 'IFRAME') {
+                        opt_target = extractParamFromUri(intent_event.target.src, 'url');
+                  }
+                  _gaq.push(['_trackSocial', 'twitter', 'tweet', opt_pagePath]);
+                }
+                }
+                //Wrap event bindings - Wait for async js to load
+                twttr.ready(function (twttr) {
+                    //event bindings
+                    twttr.events.bind('tweet', trackTwitter);
+                });
+            </script></li>
+            <li><g:plusone size="medium"></g:plusone></li>
+            <li><div class="fb-like" data-href="http://greenstreets.mapc.org" data-send="false" data-layout="button_count" data-show-faces="false"></div></li>
+          </ul>
+      </div>
+    </div> 
+</section>
 {% endblock %}

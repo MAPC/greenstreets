@@ -1,31 +1,65 @@
-.topbar h3 a {
-	padding: 18px 20px 22px;
+a, a:hover {
+    color: #64AA4F;
 }
-.main {
-	margin-top: 80px;
+
+.nowrap {
+	white-space: nowrap;
 }
-footer {
+
+/* Topnav budget numbers
+-------------------------------------------------- */
+
+.navbar .masthead {
+  border-radius: 0 0 0 0;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: #ffffff;
+  height: 110px;
+  overflow: hidden;
+  border-bottom: 1px solid #64A950;
+}
+
+/* Page header
+-------------------------------------------------- */
+.page-header {
+  position: relative;
+  padding-top: 120px;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+  border-bottom: none;
+}
+.page-header h1 {
+  margin-bottom: 9px;
+  font-size: 44px;
+  letter-spacing: -1px;
+}
+
+/* Front Page
+-------------------------------------------------- */
+
+.front-page, .thanks-page {
 	text-align: center;
 }
-label {
-	width: 240px;
-}
-div.input, div.uneditable-input, button.impact, .impact.help-block, #button_submit {
-    margin-left: 260px;
+
+.lead {
+  font-size: 18px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: 300;
 }
 
-.input textarea {
-	width: 400px;
+/* Footer
+-------------------------------------------------- */
+
+.footer {
+	margin-top: 40px;
+	text-align: center;
 }
 
-div.index {
-	margin-left: 0;
-}
-select {
-	margin-top: 4px;
-}
+/* Map
+-------------------------------------------------- */
+
 #map_canvas {
-	width: 100%; 
 	height: 500px;
 }
 #map_legend {
@@ -34,47 +68,105 @@ select {
 #map_legend img {
 	height: 16px;
 }
-.question_title {
-	color: #404040;
+
+#map_container .help-block img {
+	height: 24px;
 }
+
+/* Form
+-------------------------------------------------- */
+
+fieldset h2, fieldset h3 {
+	margin-bottom: 10px;
+}
+
 span.required_field {
 	color: #9D261D;
 }
 
-.center {
-	text-align: center;
-	margin-top: 20px;
+input:focus,
+textarea:focus {
+  border-color: rgba(100, 170, 79, 0.8);
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(100, 170, 79, 0.6);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(100, 170, 79, 0.6);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(100, 170, 79, 0.6);
+  outline: 0;
+  outline: thin dotted \9;
+  /* IE6-9 */
+
+}
+
+.btn.impact {
+	float: left;
 }
 
 #saved_co2, #burned_calories {
-	margin-top: 2px;
-	font-weight: bold;
+	margin-bottom: 4px;
 }
 
-.input .marker {
-	float: left;
-    margin-right: 4px;
+#burned_calories {
+	margin-top: 4px;
 }
 
-input[type="checkbox"] {
-	margin-top: 9px;
+fieldset.studentgroup {
+	border-bottom: 1px solid #DDD;
+	margin-bottom: 20px;
 }
 
-#logo {
-	float: right;
-	margin-top: 2px;
-	margin-bottom: 2px;
-	height: 56px;
-	width: 114px;
+/* Share buttons
+-------------------------------------------------- */
+
+.social-media {
+  margin-top: 20px;
 }
 
-.chzn-select {
-	width: 220px;
-}
-
-.chzn-container .chzn-results li {
-    line-height: 120%;
-    padding: 4px 7px 4px;
+.social-media li {
+  display: inline-block;
 }
 
 
+/* Responsive design
+-------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .page-header {
+    position: relative;
+    padding-top: 0px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    position: relative;
+    padding-top: 0px;
+  } 
+  .front-page .btn {
+  	margin-bottom: 10px;
+  }
+  .social-media li {
+    display: list-item;
+    margin-top: 10px;
+  }
+  .twitterwidget {
+    padding-left: 18px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 980px) {
+  .page-header {
+    position: relative;
+    padding-top: 0px;
+  }
+  .social-media li {
+    display: list-item;
+    margin-top: 10px;
+  }
+  .twitterwidget {
+    padding-left: 18px;
+  }
+}
+
+
+@media (min-width: 1200px) {
+
+}

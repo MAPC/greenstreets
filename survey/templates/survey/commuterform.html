@@ -1,567 +1,535 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block style %}
-	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-	<link rel="stylesheet" href="{{ STATIC_URL }}js/chosen/chosen/chosen.css">
-{{ block.super }}
-{% endblock style %}
+{% block title %}Check-in your commute to work!{% endblock %}
 
 {% block javascript %}
 
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-<script src="{{ STATIC_URL }}js/jquery.shuffle.js" type="text/javascript"></script>
-<script src="{{ STATIC_URL }}js/jquery.cookie.js" type="text/javascript"></script>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
 
-<script src="{{ STATIC_URL }}js/chosen/chosen/chosen.jquery.min.js" type="text/javascript"></script>
-<script src="{{ STATIC_URL }}css/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&language={{ LANGUAGE_CODE }}"></script> 
+<script src="{{ STATIC_URL }}libs/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}libs/jstorage.min.js" type="text/javascript"></script>
+
 <script type="text/javascript">
 
 $(document).ready(function() {
 
-	// check if cookies are enabled
-	$.cookie('test_cookie', 'testing', { path: '/' });
-	if ($.cookie('test_cookie') !== 'testing') {
-		alert("Please allow cookies for this site in your browser, otherwise the survey form might not work. Thank you!");
-	}
-	
-	// initiate chosen dropdown UIs	
-	$(".chzn-select").chosen();
+    var boston = new google.maps.LatLng(42.357778, -71.061667);
+    var work = new google.maps.LatLng(42.37, -71.08);
+    var home = new google.maps.LatLng(42.36, -71.10);
 
-	var boston = new google.maps.LatLng(42.357778, -71.061667);
-	var work = new google.maps.LatLng(42.37, -71.08);
-	var home = new google.maps.LatLng(42.36, -71.10);
-	
-	var mapOptions = {
-		zoom: 11,
-		mapTypeId: google.maps.MapTypeId.ROADMAP,
-		center: home
-	};
+    // load data from client
+    var cachedForm = $.jStorage.get("surveyform"); 
+    if (cachedForm) {
+        $.each(cachedForm, function(key, obj) {
+            if (jQuery.inArray(obj.name, ["csrfmiddlewaretoken", "month"]) < 0) {
+                var $formElement = $("input[name=" + obj.name + "]");
+
+                if ($formElement.attr("type") === "checkbox") {
+                    $formElement.prop("checked", true);
+                } else if (jQuery.inArray($formElement.attr("type"), ["text", "hidden"]) > -1) {
+                    $formElement.val(obj.value);
+                } else {
+                    // we only have selects
+                    $formElement = $("select[name=" + obj.name + "]")
+                    $formElement.val(obj.value);
+                }
+            }
+        });
+
+        // update map markers
+        var homeGeom = $("#id_home_location").val();
+        var workGeom = $("#id_work_location").val();
+        if (homeGeom !== "POINT (0.0000000000000000 0.0000000000000000)") {
+            homeCoords = homeGeom.replace("POINT (", "").replace(")", "").split(" ");
+            home = new google.maps.LatLng(homeCoords[1], homeCoords[0]);
+        }
+        if (workGeom !== "POINT (0.0000000000000000 0.0000000000000000)") {
+            workCoords = workGeom.replace("POINT (", "").replace(")", "").split(" ");
+            work = new google.maps.LatLng(workCoords[1], workCoords[0]);
+        }
+    }
+
+    // set to current Month build month dropdown for +/- 6 months
+    var d = new Date();
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var months_sorted = [];
+    $.each(months, function (key, month) {
+        var thisMonth = d.getMonth();
+        var year = d.getFullYear();
+        if (key > thisMonth - 7 + 12) { // month of previous year
+            year--;
+        } else if (key < (thisMonth - 6)) { // month of following year
+            year++;
+        }
+        month_nr = (key.toString().length < 2) ? ("0" + key.toString()) : key.toString();
+        months_sorted.push(year + month_nr + "|" + month + " " + year);
+    });
+    $.each(months_sorted.sort(), function (key, month_sorted) {
+        var month = month_sorted.split("|")[1];
+        $("#id_month").append("<option value='" + month + "'>" + month + "</option>");
+    });
+    $("#id_month").val(months[d.getMonth()] + " " + d.getFullYear());
+    
+
+    var mapOptions = {
+        zoom: 11,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        center: home
+    };
+
+
+    // init alert message
+    $("#submit-error").hide();
+    $(".alert .close").on('click', function (e) {
+        e.preventDefault(); 
+        $(this).parent().hide("slow");
+    });
  
-	var map = new google.maps.Map(document.getElementById("map_canvas"),
-		mapOptions);
+    var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
     
     // home and work place marker
-	var iconHome = "{{ STATIC_URL }}img/home.png";
-	var markerHome = new google.maps.Marker({
-		map:map,
-		title:"Please drag & drop the marker to the intersection closest to your home.",
-		draggable:true,
-		animation: google.maps.Animation.DROP,
-		position: home,
-		icon: iconHome
-	});
-	// animation
-	google.maps.event.addListener(markerHome, 'click', toggleBounce);
-	// track marker dragging		
-	google.maps.event.addListener(markerHome, 'dragend', function() {
-		// write loc coord to hidden geometry field (in WGS84)
-		$("#id_home_location").val("POINT (" + markerHome.position.lng() + " " +  markerHome.position.lat() + ")");
-	});
-	var iconEmployer = "{{ STATIC_URL }}img/factory.png";
-	var markerEmployer = new google.maps.Marker({
-		map: map,
-		title: "Please drag the marker to the location of your work-place.",
-		position: work,
-		draggable: true,
-		animation: google.maps.Animation.DROP,
-		icon: iconEmployer
-	});
-	// animation
-	google.maps.event.addListener(markerEmployer, 'click', toggleBounce);
-	// track marker dragging		
-	google.maps.event.addListener(markerEmployer, 'dragend', function() {
-		// write loc coord to hidden geometry field (in WGS84)
-		work = this.getPosition();
-		$("#id_work_location").val("POINT (" + this.position.lng() + " " +  this.position.lat() + ")");
-		getEmployers({
-			'lat': work.lat(), 
-			'lng': work.lng(),
-			'radius': 1609.344 // in meters
-		});
-	});
-	
-	var toggleBounce = function () {
-		if (markerH.getAnimation() != null) {
-			markerH.setAnimation(null);
-		} else {
-			markerH.setAnimation(google.maps.Animation.BOUNCE);
-		}
-	}
-	
-    // random order of modes
-    $("#id_to_work_today, #id_from_work_today, #id_to_work_yesterday, #id_from_work_yesterday").shuffle();
-    
-    // hide and show optional street intersection fields
-    $("#intersection_fields").hide();
-    
-    $("#intersection_fields_link").click(function () {
-    	$("#intersection_fields").toggle(500);
-		return false;
+    var iconHome = "{{ STATIC_URL }}img/home.png";
+    var markerHome = new google.maps.Marker({
+        map:map,
+        title:"Please drag & drop the marker to the intersection closest to your home.",
+        draggable:true,
+        animation: google.maps.Animation.DROP,
+        position: home,
+        icon: iconHome
+    });
+    // animation
+    google.maps.event.addListener(markerHome, 'click', toggleBounce);
+    // track marker dragging        
+    google.maps.event.addListener(markerHome, 'dragend', function() {
+        // write loc coord to hidden geometry field (in WGS84)
+        $("#id_home_location").val("POINT (" + markerHome.position.lng() + " " +  markerHome.position.lat() + ")");
+    });
+    var iconEmployer = "{{ STATIC_URL }}img/factory.png";
+    var markerEmployer = new google.maps.Marker({
+        map: map,
+        title: "Please drag the marker to the location of your work-place.",
+        position: work,
+        draggable: true,
+        animation: google.maps.Animation.DROP,
+        icon: iconEmployer
+    });
+    // animation
+    google.maps.event.addListener(markerEmployer, 'click', toggleBounce);
+    // track marker dragging        
+    google.maps.event.addListener(markerEmployer, 'dragend', function() {
+        // write loc coord to hidden geometry field (in WGS84)
+        work = this.getPosition();
+        $("#id_work_location").val("POINT (" + this.position.lng() + " " +  this.position.lat() + ")");
     });
     
-    $("#home-town-select").change(function() {
-    	var town = $("#home-town-select option:selected").val();
-		// simple street type-ahead to limit street options
-		$.getJSON("/town/" + town + "/streets/", function(streets) {
-			$("input#id_home_street, input#id_home_cross_st").autocomplete({
-				source: streets,
-				minLength: 3
-			});
-		});
-    });
+    // map animation
+    var toggleBounce = function () {
+        if (markerH.getAnimation() != null) {
+            markerH.setAnimation(null);
+        } else {
+            markerH.setAnimation(google.maps.Animation.BOUNCE);
+        }
+    }
     
-    // select employer
-    // $("#employer_fields").hide();
-
-    $("#work-town-select").change(function() {
-    	var town = $("#work-town-select option:selected").val();
-    	
-    	if (town !== "") {
-    		
-    		// add spinner
-    		var spinner = $(document.createElement("img"))
-    		.attr({ "src": "{{ STATIC_URL }}img/spinner.gif", "width": "24", "height": "24"})
-    		.css({ "margin-left" : "10px"})
-    		.insertAfter($("#work-town-select"));
-    		
-    		var employer_locations = {};
-    		
-    		$.getJSON("/town/" + town + "/employers/", function(employers) {
-    			// clear previouse dropdown options
-				$("#id_employer option").remove();
-				$("<option selected='selected' value=''>---------</option>").appendTo("#id_employer");
-    			$.each(employers, function(key, employer) {
-					$("<option value='" + employer.infousa_id + "'>" + employer.name + "</option>").appendTo("#id_employer");
-					employer_locations[employer.infousa_id] = employer.latlon;
-				});
-				// bind change event to select input
-				$("#id_employer").change(function () {
-    				var infousa_id = $("#id_employer option:selected").val();
-    				// var name = $("#employer-select option:selected").text();
-    				if (infousa_id === "") {
-    					$("#id_work_location").val("POINT (0.0000000000000000 0.0000000000000000)");
-    					work = map.getCenter();
-    				} else {
-    					var coords = employer_locations[infousa_id];
-    					work = new google.maps.LatLng(coords.split(" ")[0], coords.split(" ")[1]);
-    					$("#id_work_location").val("POINT (" + coords.split(" ")[1] + " " +  coords.split(" ")[0] + ")");
-    				}
-    				markerEmployer.setPosition(work);
-    			});
-    			// show select input
-				$("#employer_fields").show(500, function() {
-					// remove spinner
-					spinner.remove();
-				});
-    		});
-    		
-    	}
+    // impact buttons
+    // use Google directions distance as base
+    var directionsService = new google.maps.DirectionsService();
+    $("#button_co2").click(function() {
+        
+        var mode_to = $("#id_to_work_today option:selected").val();
+        var mode_from = $("#id_from_work_today option:selected").val();
+        
+        var legs = 2; // to and from work
+        var co2_modes = ["", "c", "cp"];
+        // jQuery.inArray(mode_to, co2_modes)
+        if (jQuery.inArray(mode_to, co2_modes) > -1 || jQuery.inArray(mode_from, co2_modes) > -1) legs = 1;
+        if (jQuery.inArray(mode_to, co2_modes) > -1 && jQuery.inArray(mode_from, co2_modes) > -1) legs = 0;
+        // get distance for car mode
+        if (legs !== 0) {
+            var request = {
+                origin: markerHome.getPosition(),
+                destination: markerEmployer.getPosition(),
+                unitSystem: google.maps.UnitSystem.METRIC,
+                travelMode: google.maps.TravelMode.DRIVING
+            };
+            directionsService.route(request, function(result, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+                    // EPA standard: 0.41kg CO2 per mile driven (convert to lbs and meters)
+                    $("#saved_co2").text(Math.round(result.routes[0].legs[0].distance.value * legs * 0.41 * 2.20462262 / 1609.344) + " lbs");
+                    $("#id_distance").val(result.routes[0].legs[0].distance.value * legs);
+                }
+            });
+        } else {
+            $("#saved_co2").text("No CO2 emmissions saved today.");
+        }
+        return false;
     });
-	
-	// impact buttons
-	var directionsService = new google.maps.DirectionsService();
-	$("#button_co2").click(function() {
-		
-		var mode_to = $("#id_to_work_today option:selected").val();
-		var mode_from = $("#id_from_work_today option:selected").val();
-		
-		var legs = 2; // to and from work
-		var co2_modes = ["", "c", "cp"];
-		// jQuery.inArray(mode_to, co2_modes)
-		if (jQuery.inArray(mode_to, co2_modes) > -1 || jQuery.inArray(mode_from, co2_modes) > -1) legs = 1;
-		if (jQuery.inArray(mode_to, co2_modes) > -1 && jQuery.inArray(mode_from, co2_modes) > -1) legs = 0;
-		// get distance for car mode
-		if (legs !== 0) {
-	  		var request = {
-				origin: markerHome.getPosition(),
-				destination: markerEmployer.getPosition(),
-				unitSystem: google.maps.UnitSystem.METRIC,
-				travelMode: google.maps.TravelMode.DRIVING
-			};
-			directionsService.route(request, function(result, status) {
-				if (status == google.maps.DirectionsStatus.OK) {
-					// EPA standard: 0.41kg CO2 per mile driven (convert to lbs and meters)
-					$("#saved_co2").text(Math.round(result.routes[0].legs[0].distance.value * legs * 0.41 * 2.20462262 / 1609.344) + " lbs");
-					$("#id_distance").val(result.routes[0].legs[0].distance.value * legs);
-				}
-			});
-		} else {
-			$("#saved_co2").text("No saved CO2 emmissions today");
-		}
-		return false;
-	});
-	$("#button_calories").click(function() {
-		var weight = parseFloat($("#id_weight").val());
-		$("#id_weight").text(weight); // return float value of weight
-		var calories = 0;
-		var duration = 0;
-		var mode_to = $("#id_to_work_today option:selected").val();
-		var mode_from = $("#id_from_work_today option:selected").val();
-		
-		switch(mode_to) {
-			case "w":
-				var travelmode_to = google.maps.TravelMode.WALKING;
-				var mets_to = 2.5;
-				break;
-			case "b":
-				var travelmode_to = google.maps.TravelMode.BICYCLING;
-				var mets_to = 8;
-				break;
-			case "o":
-				var travelmode_to = google.maps.TravelMode.BICYCLING;
-				var mets_to = 12; // we estimate the same mets as for b but 50% more time
-				break;
-			default:
-				var mets_to = 0;
-		}
-		switch(mode_from) {
-			case "w":
-				var travelmode_from = google.maps.TravelMode.WALKING;
-				var mets_from = 2.5;
-				break;
-			case "b":
-				var travelmode_from = google.maps.TravelMode.BICYCLING;
-				var mets_from = 8;
-				break;
-			case "o":
-				var travelmode_from = google.maps.TravelMode.BICYCLING;
-				var mets_from = 12; // we estimate the same mets as for b but 50% more time
-				break;
-			default:
-				var mets_from = 0;
-		}
-		if (weight > 0) {
-			// id_duration
-			if (mets_to !== 0) {
-		  		var request_to = {
-					origin: markerHome.getPosition(),
-					destination: markerEmployer.getPosition(),
-					unitSystem: google.maps.UnitSystem.METRIC,
-					travelMode: travelmode_to
-				};
-				directionsService.route(request_to, function(result, status) {
-					if (status == google.maps.DirectionsStatus.OK) {
-						duration += result.routes[0].legs[0].duration.value;
-						//calories = (mets/2.2) * weight * hours duration
-						calories += duration / 3600 * weight * mets_to / 2.2;
-						$("#burned_calories").text(Math.round(calories));
-						$("#id_duration").val(duration);
-					}
-				});
-			}
-			if (mets_from !== 0) {
-		  		var request_from = {
-					origin: markerHome.getPosition(),
-					destination: markerEmployer.getPosition(),
-					unitSystem: google.maps.UnitSystem.METRIC,
-					travelMode: travelmode_from
-				};
-				directionsService.route(request_from, function(result, status) {
-					if (status == google.maps.DirectionsStatus.OK) {
-						duration += result.routes[0].legs[0].duration.value;
-						//calories = (mets/2.2) * weight * hours duration
-						calories += duration / 3600 * weight * mets_from / 2.2;
-						$("#burned_calories").text(Math.round(calories));
-						$("#id_duration").val(duration);
-					}
-				});
-			}
-			if (mets_from === 0 && mets_to === 0) { 
-				// car or transit doesn't burn calories
-				$("#burned_calories").text("Too few calories burned today, try walking, biking or other active transportation modes!");
-			}
-		} else {
-			$("#burned_calories").text("Please enter your weight in the above field");
-		}
-		return false;
-	});
+    $("#button_calories").click(function() {
 
-	// error modal
-	$("#form_error_modal").modal({
-		backdrop: true
-	});
+        var weight = parseFloat($("#id_weight").val()); // return float value of weight
+        $("#id_weight").text(weight); 
+        var calories = 0;
+        var duration = 0;
+        var mode_to = $("#id_to_work_today option:selected").val();
+        var mode_from = $("#id_from_work_today option:selected").val();
+        
+        switch(mode_to) {
+            case "w":
+                var travelmode_to = google.maps.TravelMode.WALKING;
+                var mets_to = 2.5;
+                break;
+            case "b":
+                var travelmode_to = google.maps.TravelMode.BICYCLING;
+                var mets_to = 8;
+                break;
+            case "o":
+                var travelmode_to = google.maps.TravelMode.BICYCLING;
+                var mets_to = 12; // we estimate the same mets as for b but 50% more time
+                break;
+            default:
+                var mets_to = 0;
+        }
+        switch(mode_from) {
+            case "w":
+                var travelmode_from = google.maps.TravelMode.WALKING;
+                var mets_from = 2.5;
+                break;
+            case "b":
+                var travelmode_from = google.maps.TravelMode.BICYCLING;
+                var mets_from = 8;
+                break;
+            case "o":
+                var travelmode_from = google.maps.TravelMode.BICYCLING;
+                var mets_from = 12; // we estimate the same mets as for b but 50% more time
+                break;
+            default:
+                var mets_from = 0;
+        }
+        if (weight > 0) {
+            if (mets_to !== 0) {
+                var request_to = {
+                    origin: markerHome.getPosition(),
+                    destination: markerEmployer.getPosition(),
+                    unitSystem: google.maps.UnitSystem.METRIC,
+                    travelMode: travelmode_to
+                };
+                directionsService.route(request_to, function(result, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        duration += result.routes[0].legs[0].duration.value;
+                        //calories = (mets/2.2) * weight * hours duration
+                        calories += duration / 3600 * weight * mets_to / 2.2;
+                        $("#burned_calories").text(Math.round(calories));
+                        $("#id_duration").val(duration);
+                    }
+                });
+            }
+            if (mets_from !== 0) {
+                var request_from = {
+                    origin: markerHome.getPosition(),
+                    destination: markerEmployer.getPosition(),
+                    unitSystem: google.maps.UnitSystem.METRIC,
+                    travelMode: travelmode_from
+                };
+                directionsService.route(request_from, function(result, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        duration += result.routes[0].legs[0].duration.value;
+                        //calories = (mets/2.2) * weight * hours duration
+                        calories += duration / 3600 * weight * mets_from / 2.2;
+                        $("#burned_calories").text(Math.round(calories));
+                        $("#id_duration").val(duration);
+                    }
+                });
+            }
+            if (mets_from === 0 && mets_to === 0) { 
+                // car or transit doesn't burn calories
+                $("#burned_calories").text("No calories burned today.");
+            }
+        } else {
+            $("#burned_calories").text("Please enter your weight first.");
+        }
+        return false;
+    });
 
-	// receives an array of points and adjusts the map extent accordingly
-	var setMapBounds = function (points) {
-		
-		var mapbounds = new google.maps.LatLngBounds();
-		$.each(points, function(index, point) { 
-			mapbounds.extend(point);
-		});
-		map.fitBounds(mapbounds);
-	}
+    // receives an array of points and adjusts the map extent accordingly
+    var setMapBounds = function (points) {  
+        var mapbounds = new google.maps.LatLngBounds();
+        $.each(points, function(index, point) { 
+            mapbounds.extend(point);
+        });
+        map.fitBounds(mapbounds);
+    }
 
-	// trigger geocoding given address and move markers on map
-	$("#locate_home, #locate_work").click(function() {
-		// home or work
-		var address_type = this.id.split("_")[1];
-		geocodeAddress(address_type);
-	});
-	$("#home-address, #work-address").keyup(function(e) {
-		// key = enter
-        if(e.which == 13) {
-        	// home or work
-        	var address_type = this.id.split("-")[0];
-			geocodeAddress(address_type);
+    // trigger geocoding given address and move markers on map
+    $("#locate_home, #locate_work").click(function() {
+        var address_type = this.id.split("_")[1]; // home or work
+        geocodeAddress(address_type);
+    });
+    $("#id_home_address, #id_work_address").keyup(function(e) {
+        if(e.which == 13) { // key = 'enter'
+            var address_type = this.id.split("_")[1]; // home or work
+            geocodeAddress(address_type);
         }
     });
 
     // calls Google's geocoder, queries employers and moves marker
-	var geocodeAddress = function(address_type) {
+    var geocodeAddress = function(address_type) {
 
-		var geocoder = new google.maps.Geocoder();
-		var address = $("#" + address_type + "-address").val();
-		
-		geocoder.geocode( { 'address': address }, function(results, status) {
-			if (status == google.maps.GeocoderStatus.OK) {
+        var geocoder = new google.maps.Geocoder();
+        var $address = $("#id_" + address_type + "_address");
 
-				if (address_type === "home") {
-					home = results[0].geometry.location;
-					markerHome.setPosition(home);
-					$("#id_home_location").val("POINT (" + markerHome.position.lng() + " " +  markerHome.position.lat() + ")");
-					setMapBounds([markerHome.position, markerEmployer.position]);
-				}
-				if (address_type === "work") {
-					work = results[0].geometry.location;
-					markerEmployer.setPosition(work);
-					$("#id_work_location").val("POINT (" + markerEmployer.position.lng() + " " +  markerEmployer.position.lat() + ")");
-					setMapBounds([markerHome.position, markerEmployer.position]);
-					// search for employers
-					getEmployers({
-						'lat': work.lat(), 
-						'lng': work.lng(),
-						'radius': 1609.344 // in meters
-					});
-				}		
-										
-			} else {
-				$("#form_error_msg").html("<p>Sorry, we couldn't find your address.</p>");
-				$("#form_error_modal").modal("show");
-			}
-		});
-	}
+        // clear errors
+        $address.parentsUntil("fieldset").removeClass("error");
+        
+        geocoder.geocode( { 'address': $address.val() }, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
 
-	// get employer JSON based on a location
-	// data = { 'lat': latitute, 'lng': longitude, 'radius': radius in meters }
-	var getEmployers = function (data) {
-	
-		var employer_locations = {};
-		$.get("/employers/", data,
-		function(employers){
-			
-			var employer_locations = {};
+                if (address_type === "home") {
+                    home = results[0].geometry.location;
+                    markerHome.setPosition(home);
+                    $("#id_home_location").val("POINT (" + markerHome.position.lng() + " " +  markerHome.position.lat() + ")");
+                    $("#id_home_address").val(results[0]['formatted_address']);
+                    setMapBounds([markerHome.position, markerEmployer.position]);
+                }
+                if (address_type === "work") {
+                    work = results[0].geometry.location;
+                    markerEmployer.setPosition(work);
+                    $("#id_work_location").val("POINT (" + markerEmployer.position.lng() + " " +  markerEmployer.position.lat() + ")");
+                    $("#id_work_address").val(results[0]['formatted_address']);
+                    setMapBounds([markerHome.position, markerEmployer.position]);
+                }
+                $address.parentsUntil("fieldset").addClass("success");
+                $address.parent().children(".help-inline").html("The address was successfully located.");
+                                           
+            } else {
+                $address.parentsUntil("fieldset").addClass("error");
+                $address.parent().children(".help-inline").html("We were not able to locate that address.");
+            }
+        });
+    }
 
-			// clear previouse dropdown options and events
-			// $("#id_employer").unbind();
-			$("#id_employer option").remove();
-			// build dropdown
-			$("<option selected='selected' value=''>---------</option>").appendTo("#id_employer");
-			$.each(employers, function(key, employer) {
-				$("<option value='" + employer.infousa_id + "'>" + employer.name + "</option>")
-				.data('latlon', employer.latlon)
-				.appendTo("#id_employer");
-			});
-			// update list
-			$("#id_employer").trigger("liszt:updated");
-			// bind change event to select input
-			$("#id_employer").chosen().change(function () {
-				var latlon = $("#id_employer option:selected").data('latlon');
-				if (latlon !== undefined) {
-					work = new google.maps.LatLng(latlon.split(" ")[0], latlon.split(" ")[1]);
-					$("#id_work_location").val("POINT (" + latlon.split(" ")[1] + " " + latlon.split(" ")[0] + ")");
-					markerEmployer.setPosition(work);
-					setMapBounds([markerHome.position, markerEmployer.position]);
-				}
-			});
+    // form validation
+    $("#surveyform").on("submit", function () {
 
-		}, "json");
-	}
+        // clear error messages
+        $("#submit-error").hide();
+        
+        // check for valid email
+        var emailReg = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        if (emailReg.test($("#id_email").val()) === false) {
+            $("#submit-error .alert-heading").html("Error #1: Invalid Email Address");
+            $("#submit-error p").html("Please provide a valid email address.");
+            $("#submit-error").show("slow"); 
+            return false;
+        }
 
-	// form validation
-	$("#commuterform").submit(function() {
-		
-		// check for valid email
-		var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-		if (emailReg.test($("#id_email").val()) === false || $("#id_email").val() === "") {
-			$("#form_error_msg").html("<p>Please provide a valid email address.</p>");
-			$("#form_error_modal").modal("show");
-			return false;
-		}
+        // check locations for default locations
+        if ($("#id_home_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
+            $("#submit-error .alert-heading").html("Error #2: No Home or Start Location");
+            $("#submit-error p").html("Please provide your home or start location.");
+            $("#submit-error").show("slow"); 
+            return false;
+        }
+        if ($("#id_work_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
+            $("#submit-error .alert-heading").html("Error #2: No Work or End Location");
+            $("#submit-error p").html("Please provide your work or end location.");
+            $("#submit-error").show("slow");
+            return false;
+        }
 
-		// check locations
-		if ($("#id_home_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
-			// no marker and no intersection
-			if ($("#id_home_street").val() === "" || $("#id_home_cross_st").val() === "" ) {
-				$("#form_error_msg").html("<p>Please provide your home location.</p>");
-				$("#form_error_modal").modal("show");
-				return false;
-			}
-		}
-		if ($("#id_work_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
-			$("#form_error_msg").html("<p>Please provide your work-place location.</p>");
-			$("#form_error_modal").modal("show");
-			return false;
-		}
-		if ($("#id_to_work_today option:selected").val() === "" && $("#id_from_work_today option:selected").val() === "") {
-			$("#form_error_msg").html("<p>Please tell us how you commuted to and from work today.</p>");
-			$("#form_error_modal").modal("show");
-			return false;
-		}
+        // no mode selected
+        if ($("#id_to_work_today option:selected").val() === "" || $("#id_from_work_today option:selected").val() === "") {
+            $("#submit-error .alert-heading").html("Error #2: No Mode selected");
+            $("#submit-error p").html("Please tell us how you commuted to and from work today.");
+            $("#submit-error").show("slow");
+            return false;
+        }
+
+        // store form data on client
+        $.jStorage.set("surveyform", $(this).serializeArray());
    });
-    
 });
 
 </script>
 
+
 {% endblock %}
+
+{% block pageheader %}
+    <h1>Check-in your commute to work!</h1>
+    <p class="lead">A check-in helps us monitor the impact of our initiative and involves only a few quick steps.</p>
+{% endblock pageheader %}
 
 {% block body %}
 
-<h2>Check-in your commute to work!</h2>
+<section>
+    <div class="row">
+      <div class="span12">
 
-<p>A check-in helps us monitor the impact of our initiative and involves only a few quick steps.</p>
+            <form id="surveyform" class="form-horizontal" action="." method="POST">
+                
+                {% csrf_token %}
 
-<form id="commuterform" action="." method="POST">
-	
-	{% csrf_token %}
+                <fieldset class="well">
+                    <div class="control-group">
+                        <label class="control-label">You are checking in for:</label>
+                        <div class="controls">
+                            <select id="id_month" name="month"></select>
+                        </div>
+                    </div>
+                </fieldset>
 
-	<fieldset>
-    	<h3>1. Please tell us about yourself:</h3>
-    	<div class="clearfix">
-			<label>Your name</label><div class="input">{{ commuterform.name }}</div>
-		</div>
-		<div class="clearfix">
-			<label>Your phone number</label><div class="input">{{ commuterform.phone }}</div>
-		</div>
-		<div class="clearfix">
-			<label>Your email (<span class="required_field">required</span>)</label><div class="input">{{ commuterform.email }}<span class="help-block">We respect your privacy and won't share any information.</span></div>
-		</div>
-		<div class="clearfix">
-			<label>I would like to subscribe to your monthly newsletter.</label><div class="input">{{ commuterform.newsletter }}</div> 
-		</div>
-    </fieldset>
+                <fieldset class="well">
+                    <h2>1. Please tell us about yourself (<span class="required_field">required</span>)</h2>
+                    <div class="control-group">
+                        <label class="control-label">Your name</label>
+                        <div class="controls">{{ surveyform.name }}</div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Your email</label>
+                        <div class="controls">
+                            {{ surveyform.email }}<span class="help-inline">We respect your privacy and won't share any information.</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <label class="checkbox">
+                                {{ surveyform.newsletter }}
+                                I would like to subscribe to your monthly newsletter
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
 
-	<fieldset>
-		
-		<h3>2. Please tell us about your commute (<span class="required_field">required</span>):</h3>
+                <fieldset class="well">
+                    
+                    <h2>2. Please tell us about your commute</h2>
 
-		<p>Please tell us where your commute started and ended today. Please use the address fields or drag and drop the icons.</p>
+                    <h3>Where did your commute start and end today (<span class="required_field">required</span>)?</h3> 
 
-		<div class="clearfix">
-			<label>Enter your home address:</label><div class="input"><img src="{{ STATIC_URL }}img/home.png" height="26" alt="Home marker" class="marker"> <input type="text" id="home-address" /> <a id="locate_home" class="btn">Locate</a></div>
-		</div>
-		<div class="clearfix">
-			<label>Enter your work address:</label><div class="input"><img src="{{ STATIC_URL }}img/factory.png" height="26" alt="Home marker" class="marker"> <input type="text" id="work-address" /> <a id="locate_work" class="btn">Locate</a></div>
-		</div>
+                    <p>Please enter your street addresses and click the "Locate" buttons.</p>
 
-		<div id="map_canvas">map div</div>
-		<p id="map_legend" class="small"><img src="{{ STATIC_URL }}img/home.png" height="20" alt="Home marker" > {% blocktrans %}for home{% endblocktrans %}, and <img src="{{ STATIC_URL }}img/factory.png" height="20" alt="Home marker" > for workplace</p>
-	
-		{{ commuterform.home_location }}
-		{{ commuterform.work_location }}
-		{{ commuterform.distance }}
-		{{ commuterform.duration }}
-		
-		<h4>How did you commute today, on Walk/Ride Day (<span class="required_field">required</span>)?</h3>
+                    <div class="control-group">
+                        <label class="control-label">Home or start address:</label>
+                        <div class="controls">
+                            <input type="text" id="id_home_address" name="home_address" placeholder="1 Main St, Boston, MA 02111" />&nbsp;<a id="locate_home" class="btn">Locate</a>
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Work or end address:</label>
+                        <div class="controls">
+                            <input type="text" id="id_work_address" name="work_address" placeholder="1 Main St, Boston, MA 02111" />&nbsp;<a id="locate_work" class="btn">Locate</a>
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
 
-		<div class="clearfix">
-			<label>To work today:</label> <div class="input">{{ commuterform.to_work_today }}</div>
-			<label>From work today:</label><div class="input">{{ commuterform.from_work_today }}<span class="help-block">Please refer to the longest leg of your commute.</span></div>
+                    <p>You can <a data-toggle="collapse" data-target="#map_container" href="javascript:void(0)">view the map</a>, to verify and make sure we located your addresses correctly</p>
 
-		</div>
+                    <div id="map_container" class="collapse">
+                        <div id="map_canvas" class="well">map div</div>
+                        <p class="help-block">Drag and drop your <img src="{{ STATIC_URL }}img/home.png" alt="Home marker" > home and <img src="{{ STATIC_URL }}img/factory.png" alt="Home marker" > work location to the correct spot on the map if they seem wrong.</p>                       
+                    </div>
+                
+                    {{ surveyform.home_location }}
+                    {{ surveyform.work_location }}
+                    {{ surveyform.distance }}
+                    {{ surveyform.duration }}
+                    
+                    <h3>How did you commute today, on Walk/Ride Day (<span class="required_field">required</span>)?</h3>
 
-		<h4>How do you normally commute?</h3>
+                    <p>Please refer to the longest leg of your commute.</p>
 
-		<div class="clearfix">
-			<label>To work on a usual day:</label> <div class="input">{{ commuterform.to_work_yesterday }}</div>
-			<label>From work on a usual day:</label><div class="input">{{ commuterform.from_work_yesterday }}<span class="help-block">Please refer to the longest leg of your commute.</span></div>
-		</div>
+                    <div class="control-group">
+                        <label class="control-label">To work today:</label>
+                        <div class="controls">{{ surveyform.to_work_today }}</div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">From work today:</label>
+                        <div class="controls">{{ surveyform.from_work_today }}</div>
+                    </div>
 
-		<div class="alert-message block-message info">
+                    <h3>How do you normally commute?</h3>
 
-			<h4>See the impact you had today:</h4><span class="help-block"></span>
-			
-			<div class="clearfix">
-				<label>Saved CO<sub>2</sub> emissions:</label> <div class="input" id="saved_co2">Click button below to calculate</div>
-				<button id="button_co2" class="btn impact">Calculate CO2</button>
-				<span class="help-block impact">Per EPA standards and assumptions, compared to commuting by car alone.</span>
-			</div>
-			
-			<div class="clearfix">
-				{{ commuterform.weight.errors }}
-				<label>Your weight [lbs]:</label> <div class="input">{{ commuterform.weight }}</div>
-				<label>Your burned calories:</label> <div id="burned_calories" class="input">Enter your weight and click button below to calculate</div>
-				<button id="button_calories" class="btn impact">Calculate Calories</button>
-				<span class="help-block impact">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car alone or transit.</span>
-			</div>
+                    <div class="control-group">
+                        <label class="control-label">Normally to work by:</label>
+                        <div class="controls">{{ surveyform.to_work_yesterday }}</div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Normally from work by:</label>
+                        <div class="controls">{{ surveyform.from_work_yesterday }}</div>
+                    </div>
 
-		</div>
+                    <h3>Record more green travels today?</h3>
 
-		<h4>Record more green travels today?</h4>
+                    <div class="control-group">
+                        <div class="controls">
+                            <label class="checkbox">
+                            {{ surveyform.other_greentravel }}
+                            I also used green transportation for shopping, errands, or social visits today
+                            </label>
+                        </div>
+                    </div>
+                    
+                </fieldset>
 
-		<div class="clearfix">
-			<label>I also used green transportation for shopping, errands, or social visits today.</label><div class="input">{{ commuterform.other_greentravel }}</div>
-		</div>
-		
-	</fieldset>
-		
-	<fieldset>
-		
-		<h3>3. Please tell us where you work:</h3>
-		
-		<div id="employer_fields">
-			<div class="clearfix">
-				<label>Please select your employer:</label>
-				<div class="input">
-					<select class="chzn-select" id="id_employer" name="employer" tabindex="2">
-						<option selected="selected" value="">Please specify your work location in Question 1 first.</option>
-					</select>
-				</div>
-			</div>
-			<div class="clearfix">
-				<label>other: </label><div class="input">{{ commuterform.other_employer }}</div>
-			</div>
-		</div>
+                <fieldset class="well">                 
 
-	</fieldset>
-	
-	<fieldset>
+                    <h2>3. Please tell us where you work</h2>
 
-		<h3>4. Get involved!</h3>
+                    <div id="employer_fields">
+                        <div class="control-group">
+                            <label class="control-label">Your employer's name:</label>
+                            <div class="controls"><input id="id_employer" type="text" name="employer" maxlength="200" data-provide="typeahead" data-items="4" data-source='[{% for employer in employers %}"{{ employer.name|escape }}"{% if not forloop.last %},{% endif %}{% endfor %}]'></div>
+                        </div>
+                    </div>
 
-		<div class="clearfix">
-			<label>My workplace, school or other organization would like to get involved and promote Walk/Ride Days, and I will be the on-site contact person.</label><div class="input">{{ commuterform.coordinator }}</div>
-		</div>
-		<div class="clearfix">
-			<label>I would like to help Green Streets by volunteering in another capacity.</label><div class="input">{{ commuterform.volunteer }}</div>
-		</div>
+                </fieldset>
 
-		<div class="clearfix">
-			<label>My workplace would like to sponsor Walk/Ride Days at a local school or event.</label><div class="input">{{ commuterform.potential_sponsor }}</div>
-		</div>
+                <div class="alert alert-success">
 
-		<div class="clearfix">
-			<label>I will take advantage of incentives offered by Walk/Ride Day Retail Partners to participants.</label><div class="input">{{ commuterform.sponsor }}</div>
-		</div>
-		
-		<div class="clearfix">
-			<label>Additional thoughts or feedback in general, about Walk/Ride Days or your green commute:</label><div class="input">{{ commuterform.feedback }}</div>
-		</div>
+                    <h2>See the impact you had today</h2>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Saved CO<sub>2</sub> emissions:</label>
+                        <div class="controls">
+                            <span class="input uneditable-input" id="saved_co2">Click button below to calculate</span><span class="help-inline">Per EPA standards and assumptions, compared to commuting by car alone.</span>
+                        </div>
+                        <div class="controls">
+                            
+                            <button id="button_co2" class="btn impact">Calculate CO2</button>
+                            
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Your weight [lbs]:</label>
+                        <div class="controls">{{ surveyform.weight }}</div>
+                        <label class="control-label">Your burned calories:</label>
+                        <div class="controls">
+                            <span class="input uneditable-input" id="burned_calories">Click button below to calculate</span><span class="help-inline">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car alone or transit.</span>
+                        </div>
+                        <div class="controls">
+                            <button id="button_calories" class="btn impact">Calculate Calories</button>
+                        </div>
+                    </div>
 
-	</fieldset>	
+                </div>
 
-	<button id="button_submit" type="submit" class="btn large primary">Check-in your commute!</button>
+                <div id="submit-error" class="alert alert-error">
+                    <a class="close" href="#">&times;</a>
+                    <h4 class="alert-heading"></h4>
+                    <p></p>
+                </div>
 
-</form>
+                <div class="form-actions">
+                    <button id="button_submit" type="submit" class="btn btn-large btn-success">Check-in your commute!</button>
+                </div>          
 
-<div id="form_error_modal" class="modal hide fade">
-	<div class="modal-header">
-		<a href="#" class="close">&times;</a>
-		<h3>Error</h3>
-	</div>
-	<div id="form_error_msg" class="modal-body"></div>
-</div>
+            </form>
+
+        </div>
+    </div>
+</section>
 
 {% endblock %}
