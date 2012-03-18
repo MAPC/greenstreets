@@ -4,11 +4,48 @@
 {% block title %}Welcome!{% endblock %}
 
 {% block pageheader %}
-    <h1 class="front-page">Walk/Ride Day Pledge and Check-in</h1>
+<h1 class="front-page">Walk/Ride Day Pledge and Check-in</h1>
 {% endblock pageheader %}
 
-{% block body %}
+{% block socialmedia %}
+<div id="fb-root"></div>
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '344726352240463', // App ID
+      channelUrl : '//greenstreets.mapc.org/channel.html', // Channel File
+      status     : true, // check login status
+      cookie     : true, // enable cookies to allow the server to access the session
+      xfbml      : true  // parse XFBML
+    });
 
+    // tracking Facebook
+    FB.Event.subscribe('edge.create', function(targetUrl) {
+      _gaq.push(['_trackSocial', 'facebook', 'like', targetUrl]);
+    });
+    FB.Event.subscribe('edge.remove', function(targetUrl) {
+      _gaq.push(['_trackSocial', 'facebook', 'unlike', targetUrl]);
+    });
+  };
+
+  // Load the SDK Asynchronously
+  (function(d){
+     var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+     js = d.createElement('script'); js.id = id; js.async = true;
+     js.src = "//connect.facebook.net/en_US/all.js";
+     d.getElementsByTagName('head')[0].appendChild(js);
+   }(document));
+</script>
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+{% endblock %}
+
+{% block body %}
 <section class="front-page">
     <div class="row">
       <div class="span12">
@@ -25,4 +62,51 @@
     </div>
 </section>
 
+<section class="social-media front-page">
+    <div class="row">
+      <div class="span12">
+          <p class="lead">Share with your friends!</p>
+          <ul class="unstyled">
+            <li class="twitterwidget"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://greenstreets.mapc.org" data-counturl="http://greenstreets.mapc.org" data-related="walkridedays" data-text="I'm going green today!" data-hashtags="walkrideday">Tweet</a>
+            <script>
+            window.twttr = (function (d,s,id) {
+              var t, js, fjs = d.getElementsByTagName(s)[0];
+              if (d.getElementById(id)) return; js=d.createElement(s); js.id=id;
+              js.src="//platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs);
+              return window.twttr || (t = { _e: [], ready: function(f){ t._e.push(f) } });
+            }(document, "script", "twitter-wjs"));
+
+                // tracking Twitter
+                function extractParamFromUri(uri, paramName) {
+                  if (!uri) {
+                    return;
+                  }
+                  var regex = new RegExp('[\\?&#]' + paramName + '=([^&#]*)');
+                  var params = regex.exec(uri);
+                  if (params != null) {
+                    return unescape(params[1]);
+                  }
+                  return;
+                }
+                function trackTwitter(intent_event) {
+                if (intent_event) {
+                  var opt_pagePath;
+                  if (intent_event.target && intent_event.target.nodeName == 'IFRAME') {
+                        opt_target = extractParamFromUri(intent_event.target.src, 'url');
+                  }
+                  _gaq.push(['_trackSocial', 'twitter', 'tweet', opt_pagePath]);
+                }
+                }
+                //Wrap event bindings - Wait for async js to load
+                twttr.ready(function (twttr) {
+                    //event bindings
+                    twttr.events.bind('tweet', trackTwitter);
+                });
+            </script></li>
+            <li><g:plusone size="medium"></g:plusone></li>
+            <li><div class="fb-like" data-href="http://greenstreets.mapc.org" data-send="false" data-layout="button_count" data-show-faces="false"></div></li>
+          </ul>
+      </div>
+    </div> 
+</section>
 {% endblock %}

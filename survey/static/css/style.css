@@ -113,6 +113,17 @@ fieldset.studentgroup {
 	margin-bottom: 20px;
 }
 
+/* Share buttons
+-------------------------------------------------- */
+
+.social-media {
+  margin-top: 20px;
+}
+
+.social-media li {
+  display: inline-block;
+}
+
 
 /* Responsive design
 -------------------------------------------------- */
@@ -132,12 +143,26 @@ fieldset.studentgroup {
   .front-page .btn {
   	margin-bottom: 10px;
   }
+  .social-media li {
+    display: list-item;
+    margin-top: 10px;
+  }
+  .twitterwidget {
+    padding-left: 18px;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 980px) {
   .page-header {
     position: relative;
     padding-top: 0px;
+  }
+  .social-media li {
+    display: list-item;
+    margin-top: 10px;
+  }
+  .twitterwidget {
+    padding-left: 18px;
   }
 }
 

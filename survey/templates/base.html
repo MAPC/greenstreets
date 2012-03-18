@@ -1,7 +1,7 @@
 {% load i18n %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="http://schema.org/Organization">
 <head>
     <meta charset="utf-8" />
     <title>{% block title %}{% endblock %} | Walk/Ride Day Pledge and Check-In</title>
@@ -17,6 +17,19 @@
 	<meta name="geo.position" content="42.34;-71.08">
 	<meta name="geo.region" content="US-MA">
 	<meta name="ICBM" content="42.34;-71.08">
+
+	<!-- facebook open graph -->
+	<meta property="og:title" content="Green Streets Check-in" />
+	<meta property="og:type" content="cause" />
+	<meta property="og:url" content="http://gogreenstreets.org" />
+	<meta property="og:image" content="http://gogreenstreets.org/sites/all/themes/vendor/theme525/images/header-banner.jpg" />
+	<meta property="og:site_name" content="The Green Streets Initiative" />
+	<meta property="fb:admins" content="644656520" />
+
+	<!-- google+ -->
+	<meta itemprop="name" content="Green Streets Walk/Ride Day Check-in">
+	<meta itemprop="description" content="Walk/Ride Days, which occur on the last Friday of every month, encourage and inspire people everywhere to go green by walking, bicycling, and using public transit as they travel to and from work, school, or other appointments.">
+	<meta itemprop="image" content="http://gogreenstreets.org/sites/all/themes/vendor/theme525/images/header-banner.jpg">
 	
 	{% block style %}
 	<link rel="stylesheet" href="{{ STATIC_URL }}libs/bootstrap/css/bootstrap.css">
@@ -24,7 +37,6 @@
 	{% endblock %}
 	
 	<script type="text/javascript">
-
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-5547782-14']);
 		_gaq.push(['_trackPageview']);
@@ -34,11 +46,11 @@
 		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 		})();
-
 	</script>
 	
 </head>
 <body>
+	{% block socialmedia %}{% endblock %}
 
 	<div class="navbar navbar-fixed-top">
 		<div class="masthead">
