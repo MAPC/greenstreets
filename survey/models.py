@@ -35,6 +35,63 @@ STUDENT_MODES = (
     )
 
 
+class Employer(models.Model):
+    """ Greens Streets Initiative Employer list """
+
+    name = models.CharField("Employer name", max_length=200)
+    active = models.BooleanField("Show in Commuter-Form", default=True)
+
+    class Meta:
+        verbose_name = _('Employer')
+        verbose_name_plural = _('Employers')
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+ 
+class Commutersurvey(models.Model):
+    """
+    Questions for adults about their commute work
+    and Green Streets interest.
+    """
+
+    month = models.CharField('Walk/Ride Day Month', max_length=50)
+    
+    home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
+    home_address = models.CharField(max_length=200)
+    work_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)')
+    work_address = models.CharField(max_length=200)
+    
+    distance = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
+    duration = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
+    
+    to_work_today = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)
+    from_work_today = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)  
+    to_work_normally = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)
+    from_work_normally = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES) 
+
+    other_greentravel = models.BooleanField(default=False)
+    
+    name = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    newsletter = models.BooleanField(default=False)
+    employer = models.CharField('Employer', max_length=50, blank=True, null=True)
+    weight = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
+    
+    ip = models.IPAddressField('IP Address', blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return u'%s' % (self.id)   
+    
+    class Meta:
+        verbose_name = 'Commuter Survey'
+        verbose_name_plural = 'Commuter Surveys'     
+
+
 class Schooldistrict(models.Model):
     """ School Districts """
     districtid = models.IntegerField(primary_key=True)
@@ -63,7 +120,7 @@ class School(models.Model):
     schid = models.CharField('School ID', max_length=8, blank=True, null=True, unique=True)
     address = models.CharField(max_length=150, blank=True, null=True)
     town_mail = models.CharField(max_length=25, blank=True, null=True)
-    town = models.CharField(max_length=25, blank=True, null=True)
+    town = models.CharField('School Town', max_length=25, blank=True, null=True)
     state = models.CharField(max_length=2, blank=True, null=True)
     zip = models.CharField(max_length=10, blank=True, null=True)
     principal = models.CharField(max_length=50, blank=True, null=True)
@@ -85,75 +142,16 @@ class School(models.Model):
     
     class Meta:
         ordering = ['name']
+        verbose_name = 'School'
+        verbose_name_plural = 'Schools' 
         
-    @permalink
-    def get_absolute_url(self):
-        return ('survey_school_form', None, { 'school_slug': self.slug, 'district_slug': self.districtid.slug})
-
-
-class Employer(models.Model):
-    """ Greens Streets Initiative Employer list """
-
-    name = models.CharField("Employer name", max_length=200)
-    active = models.BooleanField("Show in Commuter-Form", default=True)
-
-    class Meta:
-        verbose_name = _('Employer')
-        verbose_name_plural = _('Employers')
-        ordering = ['name']
-
-    def __unicode__(self):
-        self.name
-
- 
-class Commutersurvey(models.Model):
-    """
-    Questions for adults about their commute work
-    and Green Streets interest.
-    """
-
-    month = models.CharField('Walk/Ride day Month', max_length=50)
-    
-    home_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)') # default SRS 4326
-    home_address = models.CharField(max_length=200)
-    work_location = models.PointField(geography=True, blank=True, null=True, default='POINT(0 0)')
-    work_address = models.CharField(max_length=200)
-    
-    distance = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
-    duration = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True)
-    
-    to_work_today = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)
-    from_work_today = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)  
-    to_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES)
-    from_work_yesterday = models.CharField(max_length=2, blank=True, null=True, choices=COMMUTER_MODES) 
-
-    other_greentravel = models.BooleanField(default=False)
-    
-    name = models.CharField(max_length=50, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    newsletter = models.BooleanField(default=False)
-    employer = models.CharField('Employer', max_length=50, blank=True, null=True)
-    weight = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
-    
-    ip = models.IPAddressField('IP Address', blank=True, null=True)
-    created = models.DateTimeField(auto_now_add=True)
-    
-    objects = models.GeoManager()
-    
-    def __unicode__(self):
-        return u'%s' % (self.id)   
-    
-    class Meta:
-        verbose_name = 'Commuter Survey'
-        verbose_name_plural = 'Commuter Surveys'     
-
 
 class Studentsurvey(models.Model):
     """ To checkin entire classrooms or groups of students """
 
-    month = models.CharField('Walk/Ride day Month', max_length=50)
+    month = models.CharField('Walk/Ride Day Month', max_length=50)
 
-    school = models.ForeignKey(School)
+    school = models.ForeignKey(School, verbose_name='School')
 
     teacher_name = models.CharField(max_length=50, blank=True, null=True)
     teacher_email = models.EmailField()
@@ -167,7 +165,7 @@ class Studentsurvey(models.Model):
         verbose_name_plural = _('Studentsurveys')
 
     def __unicode__(self):
-        return "%s %s" % (self.month, self.school)
+        return "%s (%s, %s)" % (self.teacher_email, self.school.name, self.month)
     
 
 class Studentgroup(models.Model):
