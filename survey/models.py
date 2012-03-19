@@ -165,7 +165,7 @@ class Studentsurvey(models.Model):
         verbose_name_plural = _('Studentsurveys')
 
     def __unicode__(self):
-        return "%s (%s, %s)" % (self.teacher_email, self.school.name, self.month)
+        return "%s (%s)" % (self.teacher_email, self.month)
     
 
 class Studentgroup(models.Model):
