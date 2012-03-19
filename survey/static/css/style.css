@@ -62,12 +62,6 @@ a, a:hover {
 #map_canvas {
 	height: 500px;
 }
-#map_legend {
-	text-align: right;
-}
-#map_legend img {
-	height: 16px;
-}
 
 #map_container .help-block img {
 	height: 24px;
@@ -150,6 +144,12 @@ fieldset.studentgroup {
   .twitterwidget {
     padding-left: 18px;
   }
+  #map_canvas {
+    height: 300px;
+  }
+  #uvTab {
+    display: none !important;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 980px) {
@@ -163,6 +163,12 @@ fieldset.studentgroup {
   }
   .twitterwidget {
     padding-left: 18px;
+  }
+  #map_canvas {
+    height: 300px;
+  }
+  #uvTab {
+    display: none !important;
   }
 }
 
