@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% load i18n %}
 
+{% block title %}Error 404{% endblock %}
+
+{% block pageheader %}
+<h1>Error 404: We're sorry, we couldn't find the form you were looking for.</h1>
+{% endblock pageheader %}
+
 {% block body %}
 
-<h2>We're sorry, we couldn't find the form you were looking for.</h2>
-
-<p><a href="/">Go back</a></p>
+<section>
+    <p><a href="{% url home %}">Walk/Ride Day</a></p>
+</section>
 
 {% endblock %}
