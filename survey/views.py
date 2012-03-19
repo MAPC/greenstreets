@@ -10,12 +10,11 @@ from survey.forms import CommuterForm, StudentForm, StudentgroupForm
 
 def process_request(request):
     """ 
-    Sets 'REMOTE_ADDR' based on 'HTTP_X_FORWARDED_FOR', if the latter is set.
-    Based on http://djangosnippets.org/snippets/1706/
+    Sets 'REMOTE_ADDR' to 'HTTP_X_REAL_IP', if the latter is set.
+    'HTTP_X_REAL_IP' is specified in Nginx config.
     """
-    if 'HTTP_X_FORWARDED_FOR' in request.META:
-        ip = request.META['HTTP_X_FORWARDED_FOR'].split(",")[0].strip()
-        request.META['REMOTE_ADDR'] = ip
+    if 'HTTP_X_REAL_IP' in request.META:
+        request.META['REMOTE_ADDR'] = request.META['HTTP_X_REAL_IP']
     return request
     
 
