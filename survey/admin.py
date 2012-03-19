@@ -61,8 +61,8 @@ class CommutersurveyAdmin(admin.OSMGeoAdmin):
         ('Meta',
             {'fields': ['ip']}),
     ]
-    list_display = ('month', 'name', 'employer', 'home_address', 'work_address', 'to_work_today', 'from_work_today')
-    list_display_links = ['name']
+    list_display = ('month', 'email', 'employer', 'home_address', 'work_address', 'to_work_today', 'from_work_today')
+    list_display_links = ['email']
     list_filter = ['month']
     search_fields = ['name', 'employer']
     actions = [export_as_csv]
