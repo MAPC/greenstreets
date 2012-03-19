@@ -453,11 +453,11 @@ $(document).ready(function() {
 
                     <div class="control-group">
                         <label class="control-label">Normally to work by:</label>
-                        <div class="controls">{{ surveyform.to_work_yesterday }}</div>
+                        <div class="controls">{{ surveyform.to_work_normally }}</div>
                     </div>
                     <div class="control-group">
                         <label class="control-label">Normally from work by:</label>
-                        <div class="controls">{{ surveyform.from_work_yesterday }}</div>
+                        <div class="controls">{{ surveyform.from_work_normally }}</div>
                     </div>
 
                     <h3>Record more green travels today?</h3>
@@ -480,7 +480,8 @@ $(document).ready(function() {
                     <div id="employer_fields">
                         <div class="control-group">
                             <label class="control-label">Your employer's name:</label>
-                            <div class="controls"><input id="id_employer" type="text" name="employer" maxlength="200" data-provide="typeahead" data-items="4" data-source='[{% for employer in employers %}"{{ employer.name|escape }}"{% if not forloop.last %},{% endif %}{% endfor %}]'></div>
+                            <div class="controls"><input id="id_employer" type="text" name="employer" maxlength="200" data-provide="typeahead" data-items="4" data-source='[{% for employer in employers %}"{{ employer.name|escape }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                            </div>
                         </div>
                     </div>
 
