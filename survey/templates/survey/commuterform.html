@@ -156,19 +156,19 @@ $(document).ready(function() {
             directionsService.route(request, function(result, status) {
                 if (status == google.maps.DirectionsStatus.OK) {
                     // EPA standard: 0.41kg CO2 per mile driven (convert to lbs and meters)
-                    $("#saved_co2").val(Math.round(result.routes[0].legs[0].distance.value * legs * 0.41 * 2.20462262 / 1609.344) + " lbs");
+                    $("#saved_co2").text(Math.round(result.routes[0].legs[0].distance.value * legs * 0.41 * 2.20462262 / 1609.344) + " lbs");
                     $("#id_distance").val(result.routes[0].legs[0].distance.value * legs);
                 }
             });
         } else {
-            $("#saved_co2").val("No CO2 emmissions saved today.");
+            $("#saved_co2").text("No CO2 emmissions saved today.");
         }
         return false;
     });
     $("#button_calories").click(function() {
 
         var weight = parseFloat($("#id_weight").val()); // return float value of weight
-        $("#id_weight").val(weight); 
+        if (weight > 0) $("#id_weight").val(weight); 
         var calories = 0;
         var duration = 0;
         var mode_to = $("#id_to_work_today option:selected").val();
@@ -236,17 +236,17 @@ $(document).ready(function() {
                         duration += result.routes[0].legs[0].duration.value;
                         //calories = (mets/2.2) * weight * hours duration
                         calories += duration / 3600 * weight * mets_from / 2.2;
-                        $("#burned_calories").val(Math.round(calories));
-                        $("#id_duration").val(duration);
+                        $("#burned_calories").text(Math.round(calories));
+                        $("#id_duration").text(duration);
                     }
                 });
             }
             if (mets_from === 0 && mets_to === 0) { 
                 // car or transit doesn't burn calories
-                $("#burned_calories").val("No calories burned today.");
+                $("#burned_calories").text("No calories burned today.");
             }
         } else {
-            $("#burned_calories").val("Please enter your weight first.");
+            $("#burned_calories").text("Please enter your weight first.");
         }
         return false;
     });
@@ -498,7 +498,7 @@ $(document).ready(function() {
                         </div>
                         <div class="controls">
                             
-                            <a id="button_co2" class="btn impact" href="javascript:void(0)">Calculate CO2</a>
+                            <button id="button_co2" class="btn impact">Calculate CO2</button>
                             
                         </div>
                     </div>
@@ -511,7 +511,7 @@ $(document).ready(function() {
                             <span class="input uneditable-input" id="burned_calories">Click button below to calculate</span><span class="help-inline">Per <a target="_blank" href="http://prevention.sph.sc.edu/tools/compendium.htm">The Compendium of Physical Activities</a>, compared to commuting by car alone or transit.</span>
                         </div>
                         <div class="controls">
-                            <a id="button_calories" class="btn impact" href="javascript:void(0)">Calculate Calories</a>
+                            <button id="button_calories" class="btn impact">Calculate Calories</button>
                         </div>
                     </div>
 
