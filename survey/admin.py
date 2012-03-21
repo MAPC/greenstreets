@@ -92,7 +92,7 @@ class SchoolAdmin(admin.OSMGeoAdmin):
         return obj.survey_set.count()
 
 class StudentsurveyAdmin(admin.ModelAdmin):
-    list_display = ('month', 'school', 'teacher_name', 'num_students_sum')
+    list_display = ('month', 'school', 'teacher_email', 'num_students_sum')
     list_filter = ['month', 'school__town', 'school']
     list_display_links = ['school']
     search_fields = ['school__name', 'teacher_name']
