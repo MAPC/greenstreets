@@ -50,15 +50,24 @@ def commuter(request):
     if request.method == 'POST':
         surveyform = CommuterForm(request.POST, instance=survey)
         survey.ip = request.META['REMOTE_ADDR']
+        
+        # check if user already checked in this month
+        month = request.POST['month']
+        email = request.POST['email']
+        if Commutersurvey.objects.filter(month__iexact=month, email__iexact=email).exists():
+            existing_survey = Commutersurvey.objects.filter(month__iexact=month, email__iexact=email).order_by('-created')[0]
+            # addding existing id forces update
+            survey.id = existing_survey.id
+            survey.created = existing_survey.created
 
         # add new employer to GSI Employer list
         employer = request.POST['employer']
         if employer != "" and not Employer.objects.filter(name__exact=employer):
             new_employer = Employer(name=employer)
             new_employer.save()
+
         if surveyform.is_valid():
-            surveyform.save()
-            month = request.POST['month']
+            surveyform.save() 
             return render_to_response('survey/thanks.html', locals(), context_instance=RequestContext(request))
         else:
             return render_to_response('survey/commuterform.html', locals(), context_instance=RequestContext(request))
@@ -85,6 +94,20 @@ def student(request):
         surveyform = StudentForm(request.POST, instance=survey)
         surveyformset = SurveyFormset(request.POST, instance=survey)
         survey.ip = request.META['REMOTE_ADDR']
+
+        # check if user already checked in this month
+        month = request.POST['month']
+        teacher_email = request.POST['teacher_email']
+        if Studentsurvey.objects.filter(month__iexact=month, teacher_email__iexact=teacher_email).exists():
+            existing_survey = Studentsurvey.objects.filter(month__iexact=month, teacher_email__iexact=teacher_email).order_by('-created')[0]
+            # remove all related objects
+            existing_studentgroups = existing_survey.studentgroup_set.all()
+            for existing_studentgroup in existing_studentgroups:
+                existing_studentgroup.delete()
+            # adding existing id forces update
+            survey.id = existing_survey.id
+            survey.created = existing_survey.created
+            
         if surveyformset.is_valid() and surveyform.is_valid():
             surveyform.save()
             surveyformset.save()  
