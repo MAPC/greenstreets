@@ -237,7 +237,7 @@ $(document).ready(function() {
                         //calories = (mets/2.2) * weight * hours duration
                         calories += duration / 3600 * weight * mets_from / 2.2;
                         $("#burned_calories").text(Math.round(calories));
-                        $("#id_duration").text(duration);
+                        $("#id_duration").val(duration);
                     }
                 });
             }
