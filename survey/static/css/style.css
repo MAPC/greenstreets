@@ -134,7 +134,7 @@ fieldset.studentgroup {
     position: relative;
     padding-top: 0px;
   } 
-  .front-page .btn {
+  .front-page .btn, #add_studentgroup.btn {
   	margin-bottom: 10px;
   }
   .social-media li {
