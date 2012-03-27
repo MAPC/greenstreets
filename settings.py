@@ -132,6 +132,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'survey',
     'south',
+    'qrcode',
 )
 
 # A sample logging configuration. The only tangible logging

@@ -19,8 +19,8 @@ COMMUTER_MODES = (
         ('w', _('Walk')),
         ('b', _('Bike')),
         ('cp', _('Carpool')),
-        ('t', _('Transit (bus, subway, train, etc.)')),
-        ('o', _('Other (skateboard, scooter, inline skates, etc.)')),
+        ('t', _('Transit (bus, subway, etc.)')),
+        ('o', _('Other (skate, canoe, etc.)')),
         ('tc', _('Telecommuting')),
     )
 
@@ -31,7 +31,7 @@ STUDENT_MODES = (
         ('fv', _('Family Vehicle (only students of one family)')),
         ('cp', _('Carpool (with students from other families)')),
         ('t', _('Transit (city bus, subway, etc.)')),
-        ('o', _('Other (skateboard, scooter, inline skates, etc.)'))
+        ('o', _('Other (skateboard, scooter, etc.)'))
     )
 
 
@@ -39,6 +39,7 @@ class Employer(models.Model):
     """ Greens Streets Initiative Employer list """
 
     name = models.CharField("Employer name", max_length=200)
+    nr_employees = models.IntegerField("Number of employees", null=True, blank=True)
     active = models.BooleanField("Show in Commuter-Form", default=True)
 
     class Meta:
