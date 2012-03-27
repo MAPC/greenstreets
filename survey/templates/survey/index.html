@@ -4,7 +4,7 @@
 {% block title %}Welcome!{% endblock %}
 
 {% block pageheader %}
-<h1 class="front-page">Walk/Ride Day Pledge and Check-in</h1>
+<h1 class="front-page">Walk/Ride Day check-in</h1>
 {% endblock pageheader %}
 
 {% block socialmedia %}
@@ -49,10 +49,12 @@
 <section class="front-page">
     <div class="row">
       <div class="span12">
-        <p class="lead">Completing this short survey for each month's <span class="wrday">Walk/Ride Day</span> helps us, you, and others, see the impact of <span class="nowrap">Walk/Ride Days</span>.</p>
+        <p class="lead">Completing this short survey for each month's <span class="wrday">Walk/Ride Day</span> helps us, you, and others, see the impact of <span class="nowrap">Walk/Ride Days</span>.<br>
+        It also counts you in for the Walk/Ride Day Corporate Challenge!</p>
         <p class="lead"><strong>After filling it out, you will be entered into a raffle!</strong></p>
-        <p class="lead"><a href="{% url commuterform %}" class="btn btn-large btn-success" tabindex="3">Check-in my own commute!</a>
-        <a href="{% url studentform %}" class="btn btn-large btn-success" tabindex="5">Check-in my students' commute!</a></p>
+        <p class="lead"><a href="{% url commuterform %}" class="btn btn-large btn-success" tabindex="3">Check-in my commute to work or school!</a>
+        <a href="{% url studentform %}" class="btn btn-large btn-success" tabindex="5">Check-in my students' commute to school!</a></p>
+        <p>Your check-in will be faster if you're using the same computer and web browser next month again.</p>
         <p class="lead">Thank you for checking in and for traveling sustainably!</p>
         <p class="lead">The Green Streets Team<br />
             <a href="mailto:walk-ride-days@comcast.net?subject=Walk/Ride Day Check-In Question">walk-ride-days@comcast.net</a><br />
@@ -67,7 +69,7 @@
       <div class="span12">
           <p class="lead">Share with your friends!</p>
           <ul class="unstyled">
-            <li class="twitterwidget"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://greenstreets.mapc.org" data-counturl="http://greenstreets.mapc.org" data-related="walkridedays" data-text="I'm going green today!" data-hashtags="walkrideday">Tweet</a>
+            <li class="twitterwidget"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://greenstreets.mapc.org" data-counturl="http://greenstreets.mapc.org" data-related="walkridedays" data-text="I'm commuting green today!" data-hashtags="walkrideday">Tweet</a>
             <script>
             window.twttr = (function (d,s,id) {
               var t, js, fjs = d.getElementsByTagName(s)[0];
