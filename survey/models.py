@@ -39,6 +39,7 @@ class Employer(models.Model):
     """ Greens Streets Initiative Employer list """
 
     name = models.CharField("Employer name", max_length=200)
+    nr_employees = models.IntegerField("Number of employees", null=True, blank=True)
     active = models.BooleanField("Show in Commuter-Form", default=True)
 
     class Meta:

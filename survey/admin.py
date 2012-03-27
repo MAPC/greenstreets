@@ -47,8 +47,8 @@ export_as_csv.short_description = "Export selected rows as csv file"
 class EmployerAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display_links = ['id']
-    list_display = ['id', 'name', 'active']
-    list_editable = ['name', 'active']
+    list_display = ['id', 'name', 'active', 'nr_employees']
+    list_editable = ['name', 'active', 'nr_employees']
     actions = [export_as_csv]
 
 
