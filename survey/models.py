@@ -175,7 +175,7 @@ class Studentgroup(models.Model):
     teacher = models.ForeignKey(Studentsurvey)
 
     number = models.IntegerField('Number of students', default=1)
-    distance = models.IntegerField('Travel distance', help_text='Average, in miles', blank=True, null=True)
+    distance = models.DecimalField('Travel distance', help_text='Average, in miles, e.g. 1.25', max_digits=10, decimal_places=3, blank=True, null=True)
 
     to_school_today = models.CharField(max_length=2, blank=True, null=True, choices=STUDENT_MODES)
     from_school_today = models.CharField(max_length=2, blank=True, null=True, choices=STUDENT_MODES) 
