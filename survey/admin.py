@@ -14,7 +14,7 @@ from django.contrib.gis import admin
 
 # default GeoAdmin overloads
 admin.GeoModelAdmin.default_lon = -7915039
-admin.GeoModelAdmin.default_lat = 5216500 #5220376  
+admin.GeoModelAdmin.default_lat = 5216500
 admin.GeoModelAdmin.default_zoom = 12
 
 
@@ -64,6 +64,8 @@ class CommutersurveyAdmin(admin.OSMGeoAdmin):
             {'fields': ['month', 'name', 'email', 'employer', 'newsletter']}),
         ('Commute', 
             {'fields': ['home_address', 'work_address', 'to_work_today', 'from_work_today', 'to_work_normally', 'from_work_normally']}),
+        ('Maps',
+            {'fields': ['home_location', 'work_location']}),
         ('Meta',
             {'fields': ['ip']}),
     ]
