@@ -38,7 +38,10 @@ def export_as_csv(modeladmin, request, queryset):
     
     # Write data rows
     for obj in queryset:
-        writer.writerow([getattr(obj, field) for field in field_names])
+        try:
+            writer.writerow([getattr(obj, field) for field in field_names])
+        except UnicodeEncodeError:
+            print "Could not export data row."
     return response
 
 export_as_csv.short_description = "Export selected rows as csv file"
@@ -47,9 +50,12 @@ export_as_csv.short_description = "Export selected rows as csv file"
 class EmployerAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display_links = ['id']
-    list_display = ['id', 'name', 'active', 'nr_employees']
+    list_display = ['id', 'name', 'active', 'nr_employees', 'survey_count']
     list_editable = ['name', 'active', 'nr_employees']
     actions = [export_as_csv]
+
+    def survey_count(self, obj):
+        return Commutersurvey.objects.filter(employer__exact=obj.name).count()
 
 
 class CommutersurveyAdmin(admin.OSMGeoAdmin):
@@ -61,9 +67,10 @@ class CommutersurveyAdmin(admin.OSMGeoAdmin):
         ('Meta',
             {'fields': ['ip']}),
     ]
-    list_display = ('month', 'email', 'employer', 'home_address', 'work_address', 'to_work_today', 'from_work_today')
+    list_display = ('month', 'email', 'employer', 'home_address', 'work_address', 'to_work_today', 'from_work_today', 'to_work_normally', 'from_work_normally')
     list_display_links = ['email']
-    list_filter = ['month']
+    list_editable = ['employer']
+    list_filter = ['month', 'to_work_today', 'from_work_today', 'to_work_normally', 'from_work_normally']
     search_fields = ['name', 'employer']
     actions = [export_as_csv]
 
