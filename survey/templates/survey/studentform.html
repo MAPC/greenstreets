@@ -19,6 +19,7 @@ $(document).ready(function() {
         $.getJSON("/district/" + district + "/schools/", function(schools) {
             // remove previous schools
             $("#school-select option").remove();
+            $("<option value='' selected='selected'>---------</option>").appendTo("#school-select");
             $.each(schools, function(id, school) {
                 $("<option value='" + school['id'] + "'>" + school['name'] + "</option>").appendTo("#school-select");
             });
