@@ -261,8 +261,13 @@ $(document).ready(function() {
         map.fitBounds(mapbounds);
     }
 
-    // trigger geocoding given address and move markers on map
-    $("#locate_home, #locate_work").click(function() {
+
+    // trigger geocoding given address and move markers on map 
+    $("#locate_home, #locate_work").on("click", function() {
+        var address_type = this.id.split("_")[1]; // home or work
+        geocodeAddress(address_type);
+    });
+    $("#id_home_address, #id_work_address").on("focusout", function(e) {
         var address_type = this.id.split("_")[1]; // home or work
         geocodeAddress(address_type);
     });
@@ -273,14 +278,15 @@ $(document).ready(function() {
         }
     });
 
+
     // calls Google's geocoder, queries employers and moves marker
     var geocodeAddress = function(address_type) {
 
         var geocoder = new google.maps.Geocoder();
         var $address = $("#id_" + address_type + "_address");
 
-        // clear errors
-        $address.parentsUntil("fieldset").removeClass("error");
+        // clear previous results
+        $address.parentsUntil("fieldset").removeClass("error success");
         
         geocoder.geocode( { 'address': $address.val() }, function(results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
