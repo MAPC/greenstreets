@@ -3,7 +3,7 @@ import csv
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 
-from django.db.models import Sum
+from django.db.models import Sum, Count
 
 from django.forms import ModelForm
 
@@ -101,7 +101,7 @@ class SchoolAdmin(admin.OSMGeoAdmin):
         return obj.survey_set.count()
 
 class StudentsurveyAdmin(admin.ModelAdmin):
-    list_display = ('month', 'school', 'teacher_email', 'num_students_sum')
+    list_display = ('month', 'school', 'teacher_email', 'num_students_sum', 'num_studentgroups_count', 'created')
     list_filter = ['month', 'school__town', 'school']
     list_display_links = ['school']
     search_fields = ['school__name', 'teacher_name']
@@ -109,12 +109,19 @@ class StudentsurveyAdmin(admin.ModelAdmin):
 
     def queryset(self, request):
         qs = super(StudentsurveyAdmin, self).queryset(request)
-        return qs.annotate(num_students=Sum('studentgroup__number'))
+        return qs.annotate(num_students=Sum('studentgroup__number'), num_studentgroups=Count('studentgroup'))
 
     def num_students_sum(self, obj):
         return obj.num_students
     num_students_sum.short_description = 'Checked-in Students'
     num_students_sum.admin_order_field = 'num_students_sum'
+
+    def num_studentgroups_count(self, obj):
+        return obj.num_studentgroups
+    num_studentgroups_count.short_description = 'Studentgroups'
+    num_studentgroups_count.admin_order_field = 'num_studentgroups_count'
+
+    
 
 
 class StudentgroupAdmin(admin.ModelAdmin):

@@ -98,15 +98,17 @@ def student(request):
         # check if user already checked in this month
         month = request.POST['month']
         teacher_email = request.POST['teacher_email']
-        if Studentsurvey.objects.filter(month__iexact=month, teacher_email__iexact=teacher_email).exists():
-            existing_survey = Studentsurvey.objects.filter(month__iexact=month, teacher_email__iexact=teacher_email).order_by('-created')[0]
-            # remove all related objects
-            existing_studentgroups = existing_survey.studentgroup_set.all()
-            for existing_studentgroup in existing_studentgroups:
-                existing_studentgroup.delete()
-            # adding existing id forces update
-            survey.id = existing_survey.id
-            survey.created = existing_survey.created
+        
+        # duplicate check, disabled per Nicole's request
+        # if Studentsurvey.objects.filter(month__iexact=month, teacher_email__iexact=teacher_email).exists():
+        #     existing_survey = Studentsurvey.objects.filter(month__iexact=month, teacher_email__iexact=teacher_email).order_by('-created')[0]
+        #     # remove all related objects
+        #     existing_studentgroups = existing_survey.studentgroup_set.all()
+        #     for existing_studentgroup in existing_studentgroups:
+        #         existing_studentgroup.delete()
+        #     # adding existing id forces update
+        #     survey.id = existing_survey.id
+        #     survey.created = existing_survey.created
             
         if surveyformset.is_valid() and surveyform.is_valid():
             surveyform.save()
