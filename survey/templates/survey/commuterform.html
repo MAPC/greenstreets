@@ -484,12 +484,14 @@ $(document).ready(function() {
 
                     <h2>3. Please tell us where you work</h2>
 
-                    <div id="employer_fields">
-                        <div class="control-group">
-                            <label class="control-label">Your employer's name:</label>
-                            <div class="controls"><input id="id_employer" type="text" name="employer" maxlength="200" data-provide="typeahead" data-items="8" data-source='[{% for employer in employers %}"{{ employer.name|escape }}"{% if not forloop.last %},{% endif %}{% endfor %}]'><span class="help-inline required_field">Required for Corporate Challenge participants.</span>
-                            </div>
-                        </div>
+                    <div class="control-group">
+                        <label class="control-label">Your employer's name:</label>
+                        <div class="controls"><select id="id_employer" name="employer">
+                        <option value="" selected="selected">---------</option>
+                        <option value="Other employer (not registered in Challenge)">Other employer (not registered in Challenge)</option>
+                        <option value="Self">Self</option>
+                        {% for employer in employers %}<option value="{{ employer.name|escape }}">{{ employer.name|escape }}</option>{% endfor %}
+                        </select><span class="help-inline required_field">Required for Corporate Challenge participants.</span></div>
                     </div>
 
                 </fieldset>
