@@ -34,6 +34,29 @@ STUDENT_MODES = (
         ('o', _('Other (skateboard, scooter, etc.)'))
     )
 
+class EmplSizeCategory(models.Model):
+
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = _('Employer Size Category')
+        verbose_name_plural = _('Employer Size Categories')
+
+    def __unicode__(self):
+        return self.name
+    
+
+class EmplSector(models.Model):
+
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = _('Employer Sector')
+        verbose_name_plural = _('Employer Sectors')
+
+    def __unicode__(self):
+        return self.name
+
 
 class Employer(models.Model):
     """ Greens Streets Initiative Employer list """
@@ -41,6 +64,8 @@ class Employer(models.Model):
     name = models.CharField("Employer name", max_length=200)
     nr_employees = models.IntegerField("Number of employees", null=True, blank=True)
     active = models.BooleanField("Show in Commuter-Form", default=False)
+    size_cat = models.ForeignKey(EmplSizeCategory, null=True, blank=True, verbose_name=u'Size Category')
+    sector = models.ForeignKey(EmplSector, null=True, blank=True)
 
     class Meta:
         verbose_name = _('Employer')
@@ -49,6 +74,10 @@ class Employer(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def nr_surveys(self):
+        return Commutersurvey.objects.filter(employer__exact=self.name).count()
 
  
 class Commutersurvey(models.Model):
