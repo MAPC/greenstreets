@@ -7,7 +7,7 @@ from django.db.models import Sum, Count
 
 from django.forms import ModelForm
 
-from survey.models import School, Schooldistrict, Commutersurvey, Employer, Studentsurvey, Studentgroup
+from survey.models import School, Schooldistrict, Commutersurvey, Employer, EmplSector, EmplSizeCategory, Studentsurvey, Studentgroup
 # from django.contrib import admin
 from django.contrib.gis import admin
 
@@ -50,12 +50,10 @@ export_as_csv.short_description = "Export selected rows as csv file"
 class EmployerAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display_links = ['id']
-    list_display = ['id', 'name', 'active', 'nr_employees', 'survey_count']
-    list_editable = ['name', 'active', 'nr_employees']
+    list_display = ['id', 'name', 'active', 'nr_employees', 'size_cat', 'sector', 'nr_surveys']
+    list_editable = ['name', 'active', 'nr_employees', 'size_cat', 'sector', ]
+    list_filter = ['size_cat', 'sector', 'active']
     actions = [export_as_csv]
-
-    def survey_count(self, obj):
-        return Commutersurvey.objects.filter(employer__exact=obj.name).count()
 
 
 class CommutersurveyAdmin(admin.OSMGeoAdmin):
@@ -138,5 +136,7 @@ admin.site.register(Schooldistrict, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
 admin.site.register(Commutersurvey, CommutersurveyAdmin)
 admin.site.register(Employer, EmployerAdmin)
+admin.site.register(EmplSizeCategory, admin.ModelAdmin)
+admin.site.register(EmplSector, admin.ModelAdmin)
 admin.site.register(Studentsurvey, StudentsurveyAdmin)
 admin.site.register(Studentgroup, StudentgroupAdmin)
