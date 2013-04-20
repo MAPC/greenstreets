@@ -143,7 +143,6 @@ $(document).ready(function() {
         
         var legs = 2; // to and from work
         var co2_modes = ["", "c", "cp"];
-        // jQuery.inArray(mode_to, co2_modes)
         if (jQuery.inArray(mode_to, co2_modes) > -1 || jQuery.inArray(mode_from, co2_modes) > -1) legs = 1;
         if (jQuery.inArray(mode_to, co2_modes) > -1 && jQuery.inArray(mode_from, co2_modes) > -1) legs = 0;
         // get distance for car mode
@@ -168,7 +167,7 @@ $(document).ready(function() {
     });
     $("#button_calories").click(function() {
 
-        var weight = parseFloat($("#id_weight").val()); // return float value of weight
+        var weight = parseFloat($("#id_weight").val());
         if (weight > 0) $("#id_weight").val(weight); 
         var calories = 0;
         var duration = 0;
@@ -332,13 +331,13 @@ $(document).ready(function() {
 
         // check locations for default locations
         if ($("#id_home_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
-            $("#submit-error .alert-heading").html("Error #2: No Home or Start Location");
+            $("#submit-error .alert-heading").html("Error #2: No home or start location");
             $("#submit-error p").html("Please provide your home or start location.");
             $("#submit-error").show("slow"); 
             return false;
         }
         if ($("#id_work_location").val() === "POINT (0.0000000000000000 0.0000000000000000)") {
-            $("#submit-error .alert-heading").html("Error #2: No Work or End Location");
+            $("#submit-error .alert-heading").html("Error #2: No work or end location");
             $("#submit-error p").html("Please provide your work or end location.");
             $("#submit-error").show("slow");
             return false;
@@ -346,7 +345,7 @@ $(document).ready(function() {
 
         // no mode selected
         if ($("#id_to_work_today option:selected").val() === "" || $("#id_from_work_today option:selected").val() === "") {
-            $("#submit-error .alert-heading").html("Error #2: No Mode selected");
+            $("#submit-error .alert-heading").html("Error #3: No mode selected");
             $("#submit-error p").html("Please tell us how you commuted to and from work today.");
             $("#submit-error").show("slow");
             return false;
@@ -387,13 +386,13 @@ $(document).ready(function() {
                 </fieldset>
 
                 <fieldset class="well">
-                    <h2>1. Please tell us about yourself (<span class="required_field">required</span>)</h2>
+                    <h2>1. Please tell us about yourself</h2>
                     <div class="control-group">
                         <label class="control-label">Your name</label>
                         <div class="controls">{{ surveyform.name }}</div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label">Your email</label>
+                        <label class="control-label">Your email <span class="required_field">*</span>:</label>
                         <div class="controls">
                             {{ surveyform.email }}<span class="help-inline">We use this information only as a unique identifier for your check-in. We will never share your contact information with any other organization. Please use the same email each month.</span>
                         </div>
@@ -406,25 +405,34 @@ $(document).ready(function() {
                             </label>
                         </div>
                     </div>
+                    <div class="control-group">
+                        <label class="control-label">Your employer's name:</label>
+                        <div class="controls"><select id="id_employer" name="employer">
+                        <option value="" selected="selected">---------</option>
+                        <option value="Other employer (not registered in Challenge)">Other employer (not registered in Challenge)</option>
+                        <option value="Self">Self</option>
+                        {% for employer in employers %}<option value="{{ employer.name|escape }}">{{ employer.name|escape }}</option>{% endfor %}
+                        </select><span class="help-inline required_field">Required for Corporate Challenge participants.</span></div>
+                    </div>
                 </fieldset>
 
                 <fieldset class="well">
                     
                     <h2>2. Please tell us about your commute</h2>
 
-                    <h3>Where did your commute start and end today (<span class="required_field">required</span>)?</h3> 
+                    <h3>Where did your commute start and end today?</h3> 
 
                     <p>Please enter your street addresses and click the "Locate" buttons.</p>
 
                     <div class="control-group">
-                        <label class="control-label">Home or start address:</label>
+                        <label class="control-label">Home or start address <span class="required_field">*</span>:</label>
                         <div class="controls">
                             <input type="text" id="id_home_address" name="home_address" placeholder="1 Main St, Boston, MA 02111" />&nbsp;<a id="locate_home" class="btn">Locate</a>
                             <span class="help-inline"></span>
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label">Work or end address:</label>
+                        <label class="control-label">Work or end address <span class="required_field">*</span>:</label>
                         <div class="controls">
                             <input type="text" id="id_work_address" name="work_address" placeholder="1 Main St, Boston, MA 02111" />&nbsp;<a id="locate_work" class="btn">Locate</a>
                             <span class="help-inline"></span>
@@ -443,16 +451,16 @@ $(document).ready(function() {
                     {{ surveyform.distance }}
                     {{ surveyform.duration }}
                     
-                    <h3>How did you commute today, on Walk/Ride Day (<span class="required_field">required</span>)?</h3>
+                    <h3>How did you commute today, on Walk/Ride Day?</h3>
 
                     <p>Please refer to the longest leg of your commute.</p>
 
                     <div class="control-group">
-                        <label class="control-label">To work today:</label>
+                        <label class="control-label">To work today <span class="required_field">*</span>:</label>
                         <div class="controls">{{ surveyform.to_work_today }}</div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label">From work today:</label>
+                        <label class="control-label">From work today <span class="required_field">*</span>:</label>
                         <div class="controls">{{ surveyform.from_work_today }}</div>
                     </div>
 
@@ -478,22 +486,6 @@ $(document).ready(function() {
                         </div>
                     </div>
                     
-                </fieldset>
-
-                <fieldset class="well">                 
-
-                    <h2>3. Please tell us where you work</h2>
-
-                    <div class="control-group">
-                        <label class="control-label">Your employer's name:</label>
-                        <div class="controls"><select id="id_employer" name="employer">
-                        <option value="" selected="selected">---------</option>
-                        <option value="Other employer (not registered in Challenge)">Other employer (not registered in Challenge)</option>
-                        <option value="Self">Self</option>
-                        {% for employer in employers %}<option value="{{ employer.name|escape }}">{{ employer.name|escape }}</option>{% endfor %}
-                        </select><span class="help-inline required_field">Required for Corporate Challenge participants.</span></div>
-                    </div>
-
                 </fieldset>
 
                 <div class="alert alert-success">
@@ -530,6 +522,10 @@ $(document).ready(function() {
                     <a class="close" href="#">&times;</a>
                     <h4 class="alert-heading"></h4>
                     <p></p>
+                </div>
+
+                <div>
+                    <div class="controls"><p><span class="required_field">*</span> ... marks a required field.</p></div>
                 </div>
 
                 <div class="form-actions">

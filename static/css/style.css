@@ -76,6 +76,7 @@ fieldset h2, fieldset h3 {
 
 span.required_field {
 	color: #9D261D;
+  font-weight: bold;
 }
 
 input:focus,
