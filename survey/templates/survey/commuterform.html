@@ -10,6 +10,7 @@
 <script src="{{ STATIC_URL }}libs/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
 <script src="{{ STATIC_URL }}libs/jquery.json-2.4.min.js" type="text/javascript"></script>
 <script src="{{ STATIC_URL }}libs/jstorage.min.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}libs/moment.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 
@@ -51,27 +52,11 @@ $(document).ready(function() {
         }
     }
 
-    // set to current Month build month dropdown for +/- 6 months
-    var d = new Date();
-    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    var months_sorted = [];
-    $.each(months, function (key, month) {
-        var thisMonth = d.getMonth();
-        var year = d.getFullYear();
-        if (key > thisMonth - 7 + 12) { // month of previous year
-            year--;
-        } else if (key < (thisMonth - 6)) { // month of following year
-            year++;
-        }
-        month_nr = (key.toString().length < 2) ? ("0" + key.toString()) : key.toString();
-        months_sorted.push(year + month_nr + "|" + month + " " + year);
-    });
-    $.each(months_sorted.sort(), function (key, month_sorted) {
-        var month = month_sorted.split("|")[1];
+    // dropdown for current +2 months selectable W/R Days
+    for (var i=0; i<3; i++) { 
+        var month = moment().add('months', i).format('MMMM YYYY');
         $("#id_month").append("<option value='" + month + "'>" + month + "</option>");
-    });
-    $("#id_month").val(months[d.getMonth()] + " " + d.getFullYear());
-    
+    }
 
     var mapOptions = {
         zoom: 11,
