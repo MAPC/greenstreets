@@ -56,6 +56,12 @@ class EmployerAdmin(admin.ModelAdmin):
     actions = [export_as_csv]
 
 
+class EmployerLookupAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name']
+    list_editable = ['name']
+    actions = [export_as_csv]
+
+
 class CommutersurveyAdmin(admin.OSMGeoAdmin):
     fieldsets = [
         (None, 
@@ -120,8 +126,6 @@ class StudentsurveyAdmin(admin.ModelAdmin):
     num_studentgroups_count.admin_order_field = 'num_studentgroups_count'
 
     
-
-
 class StudentgroupAdmin(admin.ModelAdmin):
     list_display = ['month', 'teacher', 'number', 'distance', 'to_school_today', 'from_school_today']
     list_display_links = ['teacher']
@@ -136,7 +140,7 @@ admin.site.register(Schooldistrict, DistrictAdmin)
 admin.site.register(School, SchoolAdmin)
 admin.site.register(Commutersurvey, CommutersurveyAdmin)
 admin.site.register(Employer, EmployerAdmin)
-admin.site.register(EmplSizeCategory, admin.ModelAdmin)
-admin.site.register(EmplSector, admin.ModelAdmin)
+admin.site.register(EmplSizeCategory, EmployerLookupAdmin)
+admin.site.register(EmplSector, EmployerLookupAdmin)
 admin.site.register(Studentsurvey, StudentsurveyAdmin)
 admin.site.register(Studentgroup, StudentgroupAdmin)
